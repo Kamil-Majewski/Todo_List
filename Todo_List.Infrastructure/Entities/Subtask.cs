@@ -2,8 +2,8 @@
 {
     public class Subtask
     {
-        public string SubtaskName { get; set; } = default!;
-        public bool SubtaskCompleted { get; set; }
+        public string Name { get; set; } = default!;
+        public bool IsCompleted { get; set; }
 
     }
 }
