@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Todo_List.Infrastructure;
+
 namespace Todo_List
 {
     public class Program
@@ -5,6 +8,10 @@ namespace Todo_List
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            var todoListConnectionString = builder.Configuration.GetConnectionString("TodoListConnectionString") ?? throw new InvalidOperationException($"Could not get database connection string");
+            builder.Services.AddDbContext<TodoListDbContext>(options =>
+                options.UseSqlServer(todoListConnectionString));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
