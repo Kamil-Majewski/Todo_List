@@ -1,4 +1,6 @@
-﻿namespace Todo_List.Infrastructure.Entities
+﻿using Todo_List.Infrastructure.Enums;
+
+namespace Todo_List.Infrastructure.Entities
 {
     public class Commitment
     {
@@ -7,10 +9,11 @@
         public string? Notes { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? DueDate { get; set; }
-        public List<DateTime>? Reminders { get; set; }
-        public List<Subtask>? Subtasks { get; set; }
+        public string? SubtasksSerialized { get; set; }
+        public int RecurInterval { get; set; }
+        public RecurrenceUnit? RecurUnit { get; set; }
         public bool IsCompleted { get; set; }
-        public Priority Priority { get; set; }
+        public Priority? Priority { get; set; }
         
     }
 }

@@ -7,5 +7,6 @@ namespace Todo_List.Infrastructure
     {
         public virtual DbSet<Commitment> Tasks { get; set; }
         public virtual DbSet<Log> Logs { get; set; }
+        public virtual DbSet<Reminder> Reminders { get; set; }
     }
 }
