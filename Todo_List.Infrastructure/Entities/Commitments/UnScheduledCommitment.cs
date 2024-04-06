@@ -1,6 +1,8 @@
-﻿namespace Todo_List.Infrastructure.Entities.Commitments
+﻿using Todo_List.Infrastructure.Entities.Commitments.Abstract;
+
+namespace Todo_List.Infrastructure.Entities.Commitments
 {
-    public class UnScheduledCommitment : Commitment
+    public class UnscheduledCommitment : Commitment
     {
     }
 }

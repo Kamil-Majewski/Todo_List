@@ -1,4 +1,5 @@
-﻿using Todo_List.Infrastructure.Enums;
+﻿using Todo_List.Infrastructure.Entities.Commitments.Abstract;
+using Todo_List.Infrastructure.Enums;
 
 namespace Todo_List.Infrastructure.Entities.Commitments
 {

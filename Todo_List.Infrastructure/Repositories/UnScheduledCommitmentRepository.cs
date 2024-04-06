@@ -3,9 +3,9 @@ using Todo_List.Infrastructure.Repositories.Interfaces;
 
 namespace Todo_List.Infrastructure.Repositories
 {
-    public class UnScheduledCommitmentRepository : GenericRepository<UnScheduledCommitment>, IUnScheduledCommitmentRepository
+    public class UnscheduledCommitmentRepository : GenericRepository<UnscheduledCommitment>, IUnscheduledCommitmentRepository
     {
-        public UnScheduledCommitmentRepository(TodoListDbContext dbContext) : base(dbContext)
+        public UnscheduledCommitmentRepository(TodoListDbContext dbContext) : base(dbContext)
         {
         }
     }

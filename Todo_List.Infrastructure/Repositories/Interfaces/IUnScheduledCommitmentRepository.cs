@@ -2,7 +2,7 @@
 
 namespace Todo_List.Infrastructure.Repositories.Interfaces
 {
-    public interface IUnScheduledCommitmentRepository : IGenericRepository<UnScheduledCommitment>
+    public interface IUnscheduledCommitmentRepository : IGenericRepository<UnscheduledCommitment>
     {
     }
 }
