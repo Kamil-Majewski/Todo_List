@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Todo_List.BusinessLogic.Services;
-using Todo_List.BusinessLogic.Services.Interfaces;
+using Todo_List.BusinessLogic.Commands.AddEntityToDatabase;
+using Todo_List.Infrastructure.Entities;
 
 namespace Todo_List.BusinessLogic.Initialization
 {
@@ -8,12 +8,7 @@ namespace Todo_List.BusinessLogic.Initialization
     {
         public static void InitializeBusinessLogicDependencies(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
-            serviceCollection.AddScoped<IOneTimeCommitmentService, OneTimeCommitmentService>();
-            serviceCollection.AddScoped<IUnscheduledCommitmentService, UnscheduledCommitmentService>();
-            serviceCollection.AddScoped<IRecurringCommitmentService, RecurringCommitmentService>();
-            serviceCollection.AddScoped<ILogService, LogService>();
-            serviceCollection.AddScoped<IReminderService, ReminderService>();
+            serviceCollection.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AddEntityToDatabaseCommand<Log>).Assembly));
         }
     }
 }
