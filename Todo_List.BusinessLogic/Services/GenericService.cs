@@ -1,7 +1,7 @@
 ﻿using Todo_List.BusinessLogic.Services.Interfaces;
 using Todo_List.Infrastructure.Repositories.Interfaces;
 
-namespace Todo_List.BusinessLogic
+namespace Todo_List.BusinessLogic.Services
 {
     public class GenericService<T> : IGenericService<T> where T : class
     {
