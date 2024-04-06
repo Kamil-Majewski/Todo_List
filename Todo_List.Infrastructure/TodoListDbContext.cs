@@ -13,5 +13,12 @@ namespace Todo_List.Infrastructure
         public virtual DbSet<UnscheduledCommitment> UnScheduledCommitments { get; set; }
         public virtual DbSet<Log> Logs { get; set; }
         public virtual DbSet<Reminder> Reminders { get; set; }
+
+        public TodoListDbContext(DbContextOptions options) :base(options)
+        {
+
+        }
     }
 }
+
+
