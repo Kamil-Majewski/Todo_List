@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Todo_List.BusinessLogic.Initialization;
 using Todo_List.Infrastructure;
+using Todo_List.Infrastructure.Initialization;
 
 namespace Todo_List
 {
@@ -15,6 +17,9 @@ namespace Todo_List
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.InitializeInfrastructureDependencies();
+            builder.Services.InitializeBusinessLogicDependencies();
 
             var app = builder.Build();
 

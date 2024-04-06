@@ -11,9 +11,10 @@ namespace Todo_List.Infrastructure.Entities
         public DateTime? DueDate { get; set; }
         public string? SubtasksSerialized { get; set; }
         public int RecurInterval { get; set; }
+        public DateTime RecurUntil { get; set; }
         public RecurrenceUnit? RecurUnit { get; set; }
         public bool IsCompleted { get; set; }
         public Priority? Priority { get; set; }
-        
+
     }
 }
