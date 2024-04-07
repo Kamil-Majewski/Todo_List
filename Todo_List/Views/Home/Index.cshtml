@@ -6,7 +6,7 @@
                 </div>
                 <div class="list-header">
                     <div class="list-header-left">
-                        <button class="add-new-button violet-button" type="button" onclick="OpenCreateTemplateWindow()">Dodaj nowe</button>
+                        <button class="add-new-button violet-button" type="button" onclick="openCreateTaskWindow()">Dodaj nowe</button>
                     </div>
                     <div class="search-for-todays-task">
                         <input class="search-for template-search" placeholder="Wyszukaj zadanie" />
@@ -31,11 +31,11 @@
                     </div>
                 </div>
             </div>
-            <div class="todays-options-container options-container" style="display:none;">
+            <div class="add-new-task options-container" style="display:none;">
                 <div class="option-content">
                     <div class="options-header">
                         <div class="previous-page" style="flex:1;">
-                            <button class="violet-button" id="todays-previous-button" type="button" style="display: flex; align-items:center;" onclick="">
+                            <button class="violet-button" type="button" style="display: flex; align-items:center;" onclick="goBackToTodaysList()">
                                 <span class="arrow-back" style="max-width:24px;"><img src="~/icons/previous.png" /></span>
                                 <span>Powrót</span>
                             </button>
@@ -46,7 +46,7 @@
                         <div style="flex:1;"></div>
                     </div>
                     <hr />
-                    <form class="options-form">
+                    <form class="options-form todays-options-form" id="add-edit-todays-task-form">
                         <div class="basic-data">
                             <span class="form-subtitle">Podstawowe dane</span>
                             <div class="form-group">
@@ -60,11 +60,11 @@
                                     <div class="col">
                                         <label for="todays-task-priority">Priorytet</label>
                                         <select class="task-priority" id="todays-task-priority">
-                                            <option value="0" selected>Brak priorytetu</option>
-                                            <option value="1" >Niski</option>
-                                            <option value="2" >Średni</option>
-                                            <option value="3" >Wysoki</option>
-                                            <option value="4" >Najwyższy</option>
+                                            <option value="-1" selected>Brak priorytetu</option>
+                                            <option value="0" >Niski</option>
+                                            <option value="1" >Średni</option>
+                                            <option value="2" >Wysoki</option>
+                                            <option value="3" >Najwyższy</option>
                                         </select>
                                     </div>
                                 </div>
@@ -88,19 +88,19 @@
                                     </div>
                                     <div class="col">
                                         <label for="today-end-date">Data zakończenia</label>
-                                        <input type="datetime-local" class="datetime-input" id="todays-end-date" />
+                                        <input type="datetime-local" class="datetime-input" id="todays-end-date" disabled />
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <hr />
-                        <div class="recurrence" style="margin-bottom:20px">
+                        <div class="recurrence">
                             <span class="form-subtitle">Powtarzalność zadania</span>
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col">
                                         <label for="todays-recurrence-unit">Jednostka czasu</label>
-                                        <select class="recurrence-unit">
+                                        <select class="recurrence-unit" id="todays-recurrence-unit">
                                             <option value="-1" selected>Nie powtarzaj</option>
                                             <option value="0">Dni</option>
                                             <option value="1">Tygodnie</option>
@@ -110,7 +110,18 @@
                                     </div>
                                     <div class="col">
                                         <label for="todays-recurrence-interval">Interwał czasu</label>
-                                        <input type="number" class="form-input" id="todays-recurrence-interval" disabled/>
+                                        <input type="text" class="form-input" id="todays-recurrence-interval" disabled/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="reminder" style="margin-bottom:20px">
+                            <span class="form-subtitle">Przypomnienie</span>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="todays-reminder-unit">Data przypomnienia</label>
+                                        <input type="datetime-local" class="datetime-input" id="todays-reminder-date" disabled />
                                     </div>
                                 </div>
                             </div>
@@ -126,4 +137,68 @@
         </div>
     </div>
 </div>
+
+<script>
+    function openCreateTaskWindow(){
+        $(".today-container").hide();
+        $(".add-new-task").show();
+    }
+
+    function goBackToTodaysList(){
+        $(".todays-options-form :input[type='text']").val('');
+        $(".todays-options-form :input[type='datetime-local']").val('');
+        $(".todays-options-form :input[type='number']").val('');
+        $(".todays-options-form textarea").val('');
+        $(".todays-options-form select").prop('selectedIndex', 0);
+        $("#todays-end-date").prop('disabled', true);
+        $("#todays-recurrence-interval").prop('disabled', true);
+        $("#todays-reminder-date").prop("disabled", true);
+
+        $(".add-new-task").hide();
+        $(".today-container").show();
+    }
+
+    function addNewTask(){
+        var name = $("#todays-task-name").val();
+        var priority = $("#todays-task-priority").val();
+        var notes = $("#todays-task-notes").val();
+        var startDate = $("#todays-start-date").val();
+        var endDate = $("#todays-end-date").val();
+        var recurrenceUnit = $("#todays-recurrence-unit").val();
+        var recurrenceInterval = $("#todays-recurrence-interval").val();
+
+        $.ajax({
+            url: '@Url.Action("CreateNewTask", "Endpoints")',
+            type: 'GET',
+            contentType: 'application/json',
+            data: { taskName: name, taskPriority: priority, taskNotes: notes, taskStartDate: startDate, taskEndDate: endDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval },
+            success: function (task) {
+                console.log(task);
+            },
+            error: function (error){
+                console.error(error.responseText);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $(document).on('submit', '#add-edit-todays-task-form', function (e) {
+            e.preventDefault();
+            addNewTask();
+            goBackToTodaysList();
+        });
+        $("#todays-start-date").change(function() {
+            $("#todays-end-date").prop('disabled', false).prop('min', `${$("#todays-start-date").val()}`);
+            $("#todays-reminder-date").prop("disabled", false).prop('max', `${$("#todays-start-date").val()}`);
+        });
+        $("#todays-recurrence-unit").change(function() {
+            $("#todays-recurrence-interval").prop('disabled', false);
+        });
+
+
+    });
+
+
+</script>
 
