@@ -9,7 +9,7 @@
                         <button class="add-new-button violet-button" type="button" onclick="OpenCreateTemplateWindow()">Dodaj nowe</button>
                     </div>
                     <div class="search-for-todays-task">
-                        <input class="search-for template-search" placeholder="Wyszukaj szablon" />
+                        <input class="search-for template-search" placeholder="Wyszukaj zadanie" />
                     </div>
                 </div>
                 <div class="list-content">
@@ -47,81 +47,83 @@
                     </div>
                     <hr />
                     <form class="options-form">
-                        <div class="form-group">
-                            <div class="row">
-                                <div class="col">
-                                    <label for="todays-task-name">Nazwa zadania *</label>
-                                    <input type="text" class="form-input" id="todays-task-name" required maxlength="30" />
+                        <div class="basic-data">
+                            <span class="form-subtitle">Podstawowe dane</span>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="todays-task-name">Nazwa zadania *</label>
+                                        <input type="text" class="form-input" id="todays-task-name" required maxlength="30" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="todays-task-priority">Priorytet</label>
+                                        <select class="task-priority" id="todays-task-priority">
+                                            <option value="0" selected>Brak priorytetu</option>
+                                            <option value="1" >Niski</option>
+                                            <option value="2" >Średni</option>
+                                            <option value="3" >Wysoki</option>
+                                            <option value="4" >Najwyższy</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="todays-task-notes">Notatki</label>
+                                        <textarea class="form-input" id="todays-task-notes" rows="3" maxlength="120" required spellcheck="false"></textarea>
+                                        <div class="symbol-counter" style="margin-top: 0.25rem; text-align: right" id="symbolCounterAdd">&nbsp</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col">
-                                    <label for="todays-task-notes">Notatki</label>
-                                    <textarea class="form-input" id="todays-task-notes" rows="3" maxlength="120" required spellcheck="false"></textarea>
-                                    <div class="symbol-counter" style="margin-top: 0.25rem; text-align: right" id="symbolCounterAdd">&nbsp</div>
+                        </div>
+                        <hr />
+                        <div class="timeframes">
+                            <span class="form-subtitle">Ramy czasowe</span>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="todays-start-date">Data rozpoczęcia</label>
+                                        <input type="datetime-local" class="datetime-input" id="todays-start-date" />
+                                    </div>
+                                    <div class="col">
+                                        <label for="today-end-date">Data zakończenia</label>
+                                        <input type="datetime-local" class="datetime-input" id="todays-end-date" />
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col">
-                                    <label for="todays-task-priority">Priorytet</label>
-                                    <select class="task-priority" id="todays-task-priority">
-                                        <option value="0" selected>Brak priorytetu</option>
-                                        <option value="1" >Niski</option>
-                                        <option value="2" >Średni</option>
-                                        <option value="3" >Wysoki</option>
-                                        <option value="4" >Najwyższy</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col">
-                                    <label for="todays-start-date">Data rozpoczęcia</label>
-                                    <input type="datetime-local" id="todays-start-date" />
-                                </div>
-                                <div class="col">
-                                    <label for="today-end-date">Data zakończenia</label>
-                                    <input type="datetime-local" id="todays-end-date" />
+                        </div>
+                        <hr />
+                        <div class="recurrence" style="margin-bottom:20px">
+                            <span class="form-subtitle">Powtarzalność zadania</span>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="todays-recurrence-unit">Jednostka czasu</label>
+                                        <select class="recurrence-unit">
+                                            <option value="-1" selected>Nie powtarzaj</option>
+                                            <option value="0">Dni</option>
+                                            <option value="1">Tygodnie</option>
+                                            <option value="2">Miesiące</option>
+                                            <option value="3">Lata</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <label for="todays-recurrence-interval">Interwał czasu</label>
+                                        <input type="number" class="form-input" id="todays-recurrence-interval" disabled/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="justify-content-center d-flex">
-                            <button type="submit" class="violet-button" id="createOrEditButtonTemplates"></button>
+                            <button type="submit" class="violet-button" id="createOrEditTodaysButton"></button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
         <div class="tab-pane" id="calendar" aria-labelledby="calendar-tab">
-            <div class="today-container list-container">
-                <div class="options-header">
-                </div>
-                <div class="list-header">
-                    <div class="list-header-left">
-                        <button class="add-new-button violet-button" type="button" onclick="OpenCreateTemplateWindow()">Dodaj nowe</button>
-                    </div>
-                    <div class="search-for-todays-task">
-                        <input class="search-for template-search" placeholder="Wyszukaj szablon" />
-                    </div>
-                </div>
-                <div class="list-content">
-                    <div class="table-responsive">
-                        <table class="template-list table table-borderless" id="template-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Nazwa</th>
-                                    <th scope="col">Opis</th>
-                                    <th scope="col">Treść</th>
-                                    <th class="centered-cell" scope="col">Opcje</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
-
 

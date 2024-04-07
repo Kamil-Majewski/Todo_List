@@ -194,11 +194,6 @@ a {
                 opacity: 1;
             }
 
-.basic-data{
-    display: flex;
-    align-items: center;
-}
-
 .time-data {
     display: flex;
     align-items: center;
@@ -411,6 +406,37 @@ select::placeholder {
     display: flex;
     align-items: center;
 }
+
+.form-subtitle {
+    color: #5a6372;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.datetime-input {
+    border-radius: 4px;
+    margin-bottom: 12px;
+    min-height: 44px;
+    border: 3px solid #f0f1f1;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    width: 100%
+}
+
+    .datetime-input:focus {
+        border: 3px solid #6f5cc4;
+        outline: none;
+    }
+
+    .datetime-inputt::placeholder {
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 500;
+        color: #a5a5a5;
+        font-size: 15px;
+    }
+
 
 
 
