@@ -2,9 +2,9 @@
 {
     public enum Priority
     {
-        Low,
-        Medium,
-        High,
-        Highest
+        Niski,
+        Średni,
+        Wysoki,
+        Najwyższy
     }
 }

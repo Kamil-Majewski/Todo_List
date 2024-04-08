@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Todo_List.BusinessLogic.Commands.AddEntityToDatabase;
+using Todo_List.Infrastructure.Entities;
 using Todo_List.Infrastructure.Entities.Commitments;
 
 namespace Todo_List.BusinessLogic.Initialization
@@ -13,7 +14,8 @@ namespace Todo_List.BusinessLogic.Initialization
             serviceCollection
                 .AddTransient<IRequestHandler<AddEntityToDatabaseCommand<UnscheduledCommitment>, UnscheduledCommitment>, AddEntityToDatabaseCommandHandler<UnscheduledCommitment>>()
                 .AddTransient<IRequestHandler<AddEntityToDatabaseCommand<RecurringCommitment>, RecurringCommitment>, AddEntityToDatabaseCommandHandler<RecurringCommitment>>()
-                .AddTransient<IRequestHandler<AddEntityToDatabaseCommand<OneTimeCommitment>, OneTimeCommitment>, AddEntityToDatabaseCommandHandler<OneTimeCommitment>>();
+                .AddTransient<IRequestHandler<AddEntityToDatabaseCommand<OneTimeCommitment>, OneTimeCommitment>, AddEntityToDatabaseCommandHandler<OneTimeCommitment>>()
+                .AddTransient<IRequestHandler<AddEntityToDatabaseCommand<Reminder>, Reminder>, AddEntityToDatabaseCommandHandler<Reminder>>();
         }
     }
 }

@@ -9,7 +9,7 @@
                         <button class="add-new-button violet-button" type="button" onclick="openCreateTaskWindow()">Dodaj nowe</button>
                     </div>
                     <div class="search-for-todays-task">
-                        <input class="search-for template-search" placeholder="Wyszukaj zadanie" />
+                        <input class="search-for todays-task-search" placeholder="Wyszukaj zadanie" />
                     </div>
                 </div>
                 <div class="list-content">
@@ -18,11 +18,11 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Nazwa</th>
-                                    <th scope="col">Notatki</th>
+                                    <th scope="col">Do kiedy</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Priorytet</th>
                                     <th scope="col">Przypomnienie</th>
-                                    <th class="centered-cell" scope="col">Opcje</th>
+                                    <th class="centered-cell" scope="col" style="min-width: 175px;">Opcje</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -71,7 +71,7 @@
                                 <div class="row">
                                     <div class="col">
                                         <label for="todays-task-notes">Notatki</label>
-                                        <textarea class="form-input" id="todays-task-notes" rows="3" maxlength="120" required spellcheck="false"></textarea>
+                                        <textarea class="form-input" id="todays-task-notes" rows="3" maxlength="120" spellcheck="false"></textarea>
                                         <div class="symbol-counter" style="margin-top: 0.25rem; text-align: right" id="symbolCounterAdd">&nbsp</div>
                                     </div>
                                 </div>
@@ -83,12 +83,8 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col">
-                                        <label for="todays-start-date">Data rozpoczęcia</label>
+                                        <label for="todays-start-date">Data zakończenia</label>
                                         <input type="datetime-local" class="datetime-input" id="todays-start-date" />
-                                    </div>
-                                    <div class="col">
-                                        <label for="today-end-date">Data zakończenia</label>
-                                        <input type="datetime-local" class="datetime-input" id="todays-end-date" disabled />
                                     </div>
                                 </div>
                             </div>
@@ -100,7 +96,7 @@
                                 <div class="row">
                                     <div class="col">
                                         <label for="todays-recurrence-unit">Jednostka czasu</label>
-                                        <select class="recurrence-unit" id="todays-recurrence-unit">
+                                        <select class="recurrence-unit" id="todays-recurrence-unit" disabled>
                                             <option value="-1" selected>Nie powtarzaj</option>
                                             <option value="0">Dni</option>
                                             <option value="1">Tygodnie</option>
@@ -113,8 +109,19 @@
                                         <input type="text" class="form-input" id="todays-recurrence-interval" disabled/>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="todays-reccur-start">Powtarzaj od</label>
+                                        <input type="date" class="datetime-input" id="todays-reccur-start" disabled />
+                                    </div>
+                                    <div class="col">
+                                        <label for="todays-reccur-until">Powtarzaj do</label>
+                                        <input type="date" class="datetime-input" id="todays-reccur-until" disabled/>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <hr />
                         <div class="reminder" style="margin-bottom:20px">
                             <span class="form-subtitle">Przypomnienie</span>
                             <div class="form-group">
@@ -142,36 +149,107 @@
     function openCreateTaskWindow(){
         $(".today-container").hide();
         $(".add-new-task").show();
+        $("#createOrEditTodaysButton").html("Utwórz zadanie")
+    }
+
+    function OnInputFilterTable(searchBarIdentification, tableIdentification) {
+        $(searchBarIdentification).on('input', function () {
+
+            var filterText = $(this).val().toLowerCase();
+
+            $(`${tableIdentification} tbody tr`).each(function () {
+                var rowHit = false;
+                $(this).find('td').each(function () {
+                    if ($(this).text().toLowerCase().includes(filterText)) {
+                        rowHit = true;
+                        return false;
+                    }
+                });
+
+                $(this).toggle(rowHit);
+            });
+        });
     }
 
     function goBackToTodaysList(){
         $(".todays-options-form :input[type='text']").val('');
         $(".todays-options-form :input[type='datetime-local']").val('');
+        $(".todays-options-form :input[type='date']").val('');
         $(".todays-options-form :input[type='number']").val('');
         $(".todays-options-form textarea").val('');
         $(".todays-options-form select").prop('selectedIndex', 0);
-        $("#todays-end-date").prop('disabled', true);
         $("#todays-recurrence-interval").prop('disabled', true);
         $("#todays-reminder-date").prop("disabled", true);
+        $("#createOrEditTodaysButton").html("");
 
         $(".add-new-task").hide();
         $(".today-container").show();
+    }
+
+    function getTodaysTasks(){
+        $.ajax({
+            url: '@Url.Action("GetTodaysTasks", "Endpoints")',
+            type: 'GET',
+            contentType: 'application/json',
+            success: function (listOfTasks) {
+                if(listOfTasks.length == 0 || listOfTasks.length == undefined){
+                    console.log("No tasks found")
+                    return;
+                }
+                listOfTasks.forEach(task => {
+                    var dueTimeParsed = new Date(task.dueDate);
+                    var currentDate = new Date();
+
+                    const isCompleted = (currentDate > dueTimeParsed)
+                        ? (task.isCompleted ? "Zakończone" : "Niewykonano w czasie")
+                        : (task.isCompleted ? "Zakończona" : "W trakcie");
+
+                    const reminder = (currentDate > dueTimeParsed)
+                        ? (task.reminderSet ? "Przypomniano" : "Nie ustawiono")
+                        : (task.reminderSet ? "Ustawiono" : "Nie ustawiono");
+
+                    var newRow = `
+                        <tr>
+                            
+                            <td>${task.name}</td>
+                            <td>${new Date(task.dueDate).toLocaleString('pl-PL').split(",")[1]}</td>
+                            <td>${isCompleted}</td>
+                            <td>${task.priority == null ? "Brak" : task.priority}</td>
+                            <td>${reminder}</td>
+                            <td class="centered-cell">
+                                ${isCompleted == "W trakcie" ? '<a href= "complete-${task.id}" class="icon-list todays-complete" > <img src="/icons/finish.png" title = "Ukończ" /> </a>' : ""}
+                                <a href="details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
+                                <a href="edit-${task.id}" class="icon-list todays-edit"><img src="/icons/edit.png" title="Edytuj"/></a>
+                                <a href="delete-${task.id}" class="icon-list todays-delete"><img src="/icons/trash.png" title="Usuń"/></a>
+                            </td>
+                        </tr>
+                    `;
+
+                    $("#todays-tasks-table tbody").append(newRow);
+                });
+            },
+            error: function (error) {
+                console.error(error.responseText);
+            }
+        });
     }
 
     function addNewTask(){
         var name = $("#todays-task-name").val();
         var priority = $("#todays-task-priority").val();
         var notes = $("#todays-task-notes").val();
-        var startDate = $("#todays-start-date").val();
-        var endDate = $("#todays-end-date").val();
+        var dueDate = $("#todays-start-date").val();
         var recurrenceUnit = $("#todays-recurrence-unit").val();
         var recurrenceInterval = $("#todays-recurrence-interval").val();
+        var recurStart = $("#todays-reccur-start").val();
+        var recurUntil = $("#todays-reccur-until").val();
+        var reminderDate = $("#todays-reminder-date").val();
 
         $.ajax({
             url: '@Url.Action("CreateNewTask", "Endpoints")',
             type: 'GET',
             contentType: 'application/json',
-            data: { taskName: name, taskPriority: priority, taskNotes: notes, taskStartDate: startDate, taskEndDate: endDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval },
+            data: { taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
             success: function (task) {
                 console.log(task);
             },
@@ -181,7 +259,11 @@
         });
     }
 
+
+
     $(document).ready(function () {
+
+        getTodaysTasks();
 
         $(document).on('submit', '#add-edit-todays-task-form', function (e) {
             e.preventDefault();
@@ -189,13 +271,53 @@
             goBackToTodaysList();
         });
         $("#todays-start-date").change(function() {
-            $("#todays-end-date").prop('disabled', false).prop('min', `${$("#todays-start-date").val()}`);
-            $("#todays-reminder-date").prop("disabled", false).prop('max', `${$("#todays-start-date").val()}`);
+            if ($("#todays-start-date").val() == ""){
+                $("#todays-reminder-date").val("").prop("disabled", true);
+                $("#todays-recurrence-interval").val("").prop('disabled', true);
+                $("#todays-recurrence-unit").prop('selectedIndex', 0);
+                $("#todays-recurrence-unit").val("").prop("disabled", true);
+                $("#todays-reccur-start").val("").prop('disabled', true);
+                $("#todays-reccur-until").val("").prop('disabled', true);
+            }
+            else{
+                $("#todays-reminder-date").prop("disabled", false).prop('max', `${$("#todays-start-date").val()}`);
+                $("#todays-recurrence-unit").prop("disabled", false);
+                $("#todays-reccur-start").prop('min', `${$("#todays-start-date").val().split('T')[0]}`);
+            }
         });
         $("#todays-recurrence-unit").change(function() {
-            $("#todays-recurrence-interval").prop('disabled', false);
+            if ($("#todays-recurrence-unit").val() == -1){
+                $("#todays-recurrence-interval").prop('disabled', true);
+                $("#todays-reccur-start").val("").prop('disabled', true);
+                $("#todays-reccur-until").val("").prop('disabled', true);
+            }
+            else{
+                $("#todays-recurrence-interval").prop('disabled', false);
+            }
+            
         });
 
+        $("#todays-recurrence-interval").change(function () {
+            if ($("#todays-recurrence-interval").val() == ""){
+                $("#todays-reccur-start").val("").prop('disabled', true);
+                $("#todays-reccur-until").val("").prop('disabled', true);
+            }
+            else{
+                $("#todays-reccur-start").prop('disabled', false);
+            }
+            
+        })
+        $("#todays-reccur-start").change(function () {
+            if ($("#todays-reccur-start").val() == "") {
+                $("#todays-reccur-until").val("").prop('disabled', true);
+            }
+            else{
+                $("#todays-reccur-until").prop('disabled', false).prop('min', `${$("#todays-reccur-start").val().split('T')[0]}`);;
+            }
+        });
+
+
+        OnInputFilterTable(".todays-task-search", "#todays-tasks-table");
 
     });
 
