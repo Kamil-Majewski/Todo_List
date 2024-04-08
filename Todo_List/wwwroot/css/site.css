@@ -176,7 +176,7 @@ a {
             left: 3px;
             opacity: 0;
             position: absolute;
-            top: 5px;
+            top: 25%;
             transform: rotate(-45deg);
             width: 12px;
         }
@@ -191,6 +191,47 @@ a {
         }
 
             .round input[type="checkbox"]:checked + label:after {
+                opacity: 1;
+            }
+
+.round-red {
+    position: relative;
+    margin-right: 16px;
+}
+
+    .round-red label {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        cursor: pointer;
+        height: 20px;
+        left: 0;
+        position: absolute;
+        top: 10%;
+        width: 20px;
+    }
+
+        .round-red label:after {
+            content: "\00D7"; /* Red X symbol */
+            color: white;
+            font-size: 20px;
+            position: absolute;
+            top: 43.5%;
+            left: 51.1%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        }
+
+    .round-red input[type="checkbox"] {
+        visibility: hidden;
+    }
+
+        .round-red input[type="checkbox"]:checked + label {
+            background-color: red;
+            border-color: red;
+        }
+
+            .round-red input[type="checkbox"]:checked + label:after {
                 opacity: 1;
             }
 

@@ -1,4 +1,18 @@
-﻿<div class="content-container">
+﻿<div class="modal fade" id="deleteEntityModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="deleteEntityModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 550px; min-width: 307px; width:fit-content;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span class="form-subtitle" id="modal-content-text"></span>
+            </div>
+            <div class="modal-footer">
+                <button class="violet-button" id="confirmDelete" type="button" style="height:40px; background-color: #c95252;">Usuń kontakt</button>
+                <button class="violet-button" id="denyDelete" type="button" style="margin-left:10px; height:40px;">Anuluj</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content-container">
     <div class="tab-content" id="category-tab-content">
         <div class="tab-pane show active" id="today" aria-labelledby="today-tab">
             <div class="today-container list-container">
@@ -17,9 +31,9 @@
                         <table class="table table-borderless" id="todays-tasks-table">
                             <thead>
                                 <tr>
+                                    <th scope="col"></th>
                                     <th scope="col">Nazwa</th>
                                     <th scope="col">Do kiedy</th>
-                                    <th scope="col">Status</th>
                                     <th scope="col">Priorytet</th>
                                     <th scope="col">Przypomnienie</th>
                                     <th class="centered-cell" scope="col" style="min-width: 175px;">Opcje</th>
@@ -152,6 +166,78 @@
         $("#createOrEditTodaysButton").html("Utwórz zadanie")
     }
 
+    function addTaskToTable(task, tableId) {
+        var dueTimeParsed = new Date(task.dueDate);
+        var currentDate = new Date();
+
+        const isCompleted = (currentDate > dueTimeParsed)
+            ? (task.isCompleted) ? `
+            <div class="round">
+                <input class="complete-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
+                <label for="checkbox-${task.id}"></label>
+            <div>`
+            : `
+            <div class="round-red">
+                <input class="failed-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
+                <label for="checkbox-${task.id}"></label>
+            <div>`
+            : (task.isCompleted) ? `
+            <div class="round">
+                <input class="complete-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
+                <label for="checkbox-${task.id}"></label>
+            <div>`
+            : `
+            <div class="round">
+                <input class="complete-task-checkbox" type="Checkbox" id="checkbox-${task.id}"/>
+                <label for="checkbox-${task.id}"></label>
+            <div>
+            `
+
+        const reminder = (currentDate > dueTimeParsed)
+            ? (task.reminderSet ? "Przypomniano" : "Nie ustawiono")
+            : (task.reminderSet ? "Ustawiono" : "Nie ustawiono");
+
+        const options = (currentDate > dueTimeParsed)
+            ? (task.isCompleted) ? `
+            <td class="centered-cell">
+                <a href="#details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
+            </td>
+            `
+            : `
+            <td class="centered-cell">
+                <a href="#details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
+                <a href="#postpone-${task.id}" class="icon-list todays-postpone"><img src="/icons/postpone.png" title="Przełóż na jutro"/></a>
+            </td>`
+            : (task.isCompleted) ? `
+            <td class="centered-cell">
+                <a href="#details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
+            </td>
+            `
+            : `
+            <td class="centered-cell">
+                <a href="#details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
+                <a href="#edit-${task.id}" class="icon-list todays-edit"><img src="/icons/edit.png" title="Edytuj"/></a>
+                <a href="#delete-${task.id}" class="icon-list todays-delete"><img src="/icons/trash.png" title="Usuń"/></a>
+            </td>
+            `
+
+
+        var newRow = `
+            <tr>
+                <td>
+                    ${isCompleted}
+                </td>
+                <td class="task-name">${task.name}</td>
+                <td>${new Date(task.dueDate).toLocaleString('pl-PL').split(",")[1]}</td>
+                <td>${task.priority == null ? "Brak" : task.priority}</td>
+                <td>${reminder}</td>
+                ${options}
+            </tr>
+        `;
+
+        $(`#${tableId} tbody`).append(newRow);
+    }
+
     function OnInputFilterTable(searchBarIdentification, tableIdentification) {
         $(searchBarIdentification).on('input', function () {
 
@@ -186,6 +272,21 @@
         $(".today-container").show();
     }
 
+    function deleteTask(taskId){
+        $.ajax({
+            url: '@Url.Action("DeleteTask", "Endpoints")',
+            type: 'GET',
+            data: {taskId},
+            contentType: 'application/json',
+            success: function () {
+
+            },
+            error: function (error) {
+                console.error(error.responseText);
+            }
+        })
+    }
+
     function getTodaysTasks(){
         $.ajax({
             url: '@Url.Action("GetTodaysTasks", "Endpoints")',
@@ -197,35 +298,8 @@
                     return;
                 }
                 listOfTasks.forEach(task => {
-                    var dueTimeParsed = new Date(task.dueDate);
-                    var currentDate = new Date();
-
-                    const isCompleted = (currentDate > dueTimeParsed)
-                        ? (task.isCompleted ? "Zakończone" : "Niewykonano w czasie")
-                        : (task.isCompleted ? "Zakończona" : "W trakcie");
-
-                    const reminder = (currentDate > dueTimeParsed)
-                        ? (task.reminderSet ? "Przypomniano" : "Nie ustawiono")
-                        : (task.reminderSet ? "Ustawiono" : "Nie ustawiono");
-
-                    var newRow = `
-                        <tr>
-                            
-                            <td>${task.name}</td>
-                            <td>${new Date(task.dueDate).toLocaleString('pl-PL').split(",")[1]}</td>
-                            <td>${isCompleted}</td>
-                            <td>${task.priority == null ? "Brak" : task.priority}</td>
-                            <td>${reminder}</td>
-                            <td class="centered-cell">
-                                ${isCompleted == "W trakcie" ? '<a href= "complete-${task.id}" class="icon-list todays-complete" > <img src="/icons/finish.png" title = "Ukończ" /> </a>' : ""}
-                                <a href="details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
-                                <a href="edit-${task.id}" class="icon-list todays-edit"><img src="/icons/edit.png" title="Edytuj"/></a>
-                                <a href="delete-${task.id}" class="icon-list todays-delete"><img src="/icons/trash.png" title="Usuń"/></a>
-                            </td>
-                        </tr>
-                    `;
-
-                    $("#todays-tasks-table tbody").append(newRow);
+                    addTaskToTable(task, "todays-tasks-table");
+                    
                 });
             },
             error: function (error) {
@@ -251,15 +325,16 @@
             contentType: 'application/json',
             data: { taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
             success: function (task) {
-                console.log(task);
+                if(task.dueDate != null){
+                    var dueDateParsed = new Date(task.dueDate);
+                    addTaskToTable(task, "todays-tasks-table");
+                }
             },
             error: function (error){
                 console.error(error.responseText);
             }
         });
     }
-
-
 
     $(document).ready(function () {
 
@@ -270,6 +345,13 @@
             addNewTask();
             goBackToTodaysList();
         });
+
+        $(document).on('hidden.bs.modal', '#viewReportModal', function () {
+            $('#confirmDelete').off('click');s
+            $('#denyDelete').off('click');
+        });
+
+
         $("#todays-start-date").change(function() {
             if ($("#todays-start-date").val() == ""){
                 $("#todays-reminder-date").val("").prop("disabled", true);
@@ -314,6 +396,31 @@
             else{
                 $("#todays-reccur-until").prop('disabled', false).prop('min', `${$("#todays-reccur-start").val().split('T')[0]}`);;
             }
+        });
+
+        $(document).on('click', ".todays-delete", function (e) {
+            e.preventDefault();
+            var id = $(this).attr('href').split('-')[1];
+            var thisElement = $(this);
+
+            var name = $(this).closest('tr').find('.task-name').text()
+
+            $("#modal-content-text").html(`Czy na pewno chcesz usunąć zadanie ${name}?`);
+            $("#confirmDelete").html("Usuń zadanie");
+
+            $('#deleteEntityModal').modal("show");
+
+            $('#confirmDelete').on('click', function () {
+                deleteTask(id);
+                thisElement.closest('tr').remove();
+                
+                $('#deleteEntityModal').modal("hide");
+            });
+
+            $('#denyDelete').on('click', function () {
+
+                $('#deleteEntityModal').modal("hide");
+            });
         });
 
 

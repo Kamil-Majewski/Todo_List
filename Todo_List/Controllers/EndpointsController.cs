@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Todo_List.BusinessLogic.Commands.AddEntityToDatabase;
+using Todo_List.BusinessLogic.Commands.DeleteCommitmentById;
+using Todo_List.BusinessLogic.Commands.DeleteEntity;
 using Todo_List.BusinessLogic.Queries.GetTodaysCommitments;
 using Todo_List.Infrastructure.Entities;
 using Todo_List.Infrastructure.Entities.Commitments;
@@ -187,7 +189,12 @@ namespace Todo_List.WebApp.Controllers
             }
         }
 
-
+        [HttpGet]
+        public async Task<IActionResult> DeleteTask(int taskId)
+        {
+            await _mediator.Send(new DeleteCommitmentByIdCommand(taskId));
+            return Ok("Task deleted successfully");
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetTodaysTasks()
@@ -195,6 +202,7 @@ namespace Todo_List.WebApp.Controllers
             var (todayOneTimeCommitments, todaysRecurringCommitments) = await _mediator.Send(new GetTodaysCommitmentsQuery());
 
             var allTodaysCommitments = todayOneTimeCommitments.Select(c => new {
+                                            Id = c.Id,
                                             Name = c.Name,
                                             DueDate = c.DueDate,
                                             IsCompleted = c.IsCompleted,
@@ -203,6 +211,7 @@ namespace Todo_List.WebApp.Controllers
                                         })
                                         .Concat(todaysRecurringCommitments.Select(c => new
                                         {
+                                            Id = c.Id,
                                             Name = c.Name,
                                             DueDate = c.DueDate,
                                             IsCompleted = c.IsCompleted,
