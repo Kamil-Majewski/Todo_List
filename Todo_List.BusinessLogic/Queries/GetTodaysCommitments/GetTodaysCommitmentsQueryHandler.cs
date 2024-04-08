@@ -19,8 +19,8 @@ namespace Todo_List.BusinessLogic.Queries.GetTodaysCommitments
         {
             var todaysDate = DateTime.Now.Date;
 
-            var todaysOneTimeCommitments = await _oneTimeCommitmentRepository.GetAllEntries().Where(otc => otc.StartDate.Date == todaysDate || (otc.DueDate.HasValue && otc.DueDate.Value.Date == todaysDate)).ToListAsync();
-            var todaysRecurringCommitments = await _recurringCommitmentRepository.GetAllEntries().Where(rc => rc.StartDate.Date == todaysDate || (rc.DueDate.HasValue && rc.DueDate.Value.Date == todaysDate)).ToListAsync();
+            var todaysOneTimeCommitments = await _oneTimeCommitmentRepository.GetAllEntries().Where(otc => otc.DueDate.HasValue && otc.DueDate.Value.Date == todaysDate).ToListAsync();
+            var todaysRecurringCommitments = await _recurringCommitmentRepository.GetAllEntries().Where(rc => rc.DueDate.HasValue && rc.DueDate.Value.Date == todaysDate).ToListAsync();
 
             return (todaysOneTimeCommitments, todaysRecurringCommitments);
         }
