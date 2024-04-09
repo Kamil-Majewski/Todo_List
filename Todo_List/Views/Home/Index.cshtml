@@ -5,12 +5,26 @@
                 <span class="form-subtitle" id="modal-content-text"></span>
             </div>
             <div class="modal-footer">
-                <button class="violet-button" id="confirmDelete" type="button" style="height:40px; background-color: #c95252;">Usuń kontakt</button>
+                <button class="violet-button" id="confirmDelete" type="button" style="height:40px; background-color: #c95252;">Usuń zadanie</button>
                 <button class="violet-button" id="denyDelete" type="button" style="margin-left:10px; height:40px;">Anuluj</button>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="completeTaskModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="completeTaskModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 460px; min-width: 307px; width:fit-content;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span class="form-subtitle" id="finish-modal-content-text">Czy chcesz zakończyć zadanie?<br><br><small>Po zakończeniu zadania opcja edycji i usunięcia zostanie zablokowana.</small></span>
+            </div>
+            <div class="modal-footer">
+                <button class="violet-button" id="confirmComplete" type="button" style="height:40px; background-color: #36953b;">Zakończ zadanie</button>
+                <button class="violet-button" id="denyComplete" type="button" style="margin-left:10px; height:40px;">Anuluj</button>
+            </div>
+        </div>
+    </div>
+</div
 
 <div class="content-container">
     <div class="tab-content" id="category-tab-content">
@@ -33,9 +47,9 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">Nazwa</th>
-                                    <th scope="col">Do kiedy</th>
-                                    <th scope="col">Priorytet</th>
+                                    <th scope="col">Czas do</th>
                                     <th scope="col">Przypomnienie</th>
+                                    <th scope="col">Priorytet</th>
                                     <th class="centered-cell" scope="col" style="min-width: 175px;">Opcje</th>
                                 </tr>
                             </thead>
@@ -298,12 +312,10 @@
             priority = "Brak";
         }
         
-        
-
         const isCompleted = (currentDate > dueTimeParsed)
             ? (task.isCompleted) ? `
             <div class="round">
-                <input class="complete-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
+                <input class="completed-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
                 <label for="checkbox-${task.id}"></label>
             <div>`
             : `
@@ -313,7 +325,7 @@
             <div>`
             : (task.isCompleted) ? `
             <div class="round">
-                <input class="complete-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
+                <input class="completed-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
                 <label for="checkbox-${task.id}"></label>
             <div>`
             : `
@@ -323,9 +335,7 @@
             <div>
             `
 
-        const reminder = (currentDate > dueTimeParsed)
-            ? (task.reminderSet ? "Przypomniano" : "Nie ustawiono")
-            : (task.reminderSet ? "Ustawiono" : "Nie ustawiono");
+        const reminder = task.reminderSet ? `${new Date(task.reminderTime).toLocaleString('pl-PL').split(", ")[1]}` : "Nie ustawiono";
 
         const options = (currentDate > dueTimeParsed)
             ? (task.isCompleted) ? `
@@ -359,8 +369,8 @@
                 </td>
                 <td class="task-name">${task.name}</td>
                 <td>${new Date(task.dueDate).toLocaleString('pl-PL').split(",")[1]}</td>
-                <td>${priority}</td>
                 <td>${reminder}</td>
+                <td>${priority}</td>
                 ${options}
             </tr>
         `;
@@ -386,7 +396,6 @@
             });
         });
     }
-
     function goBackToTodaysList(){
         $(".todays-options-form :input[type='text']").val('');
         $(".todays-options-form :input[type='datetime-local']").val('');
@@ -400,6 +409,7 @@
         $("#todays-reccur-start").prop("disabled", true);
         $("#todays-reccur-until").prop("diabled", true);
         $("#createOrEditTodaysButton").html("");
+        $("#createOrEditTodaysButton").removeAttr("entity-id")
 
         $(".add-new-task").hide();
         $(".todays-task-details-container").hide();
@@ -461,7 +471,6 @@
             data: { taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
             success: function (task) {
                 if(task.dueDate != null){
-                    var dueDateParsed = new Date(task.dueDate);
                     addTaskToTable(task, "todays-tasks-table");
                 }
             },
@@ -514,9 +523,46 @@
             goBackToTodaysList();
         });
 
-        $(document).on('hidden.bs.modal', '#viewReportModal', function () {
-            $('#confirmDelete').off('click'); s
+        $(document).on('hidden.bs.modal', '#deleteEntityModal', function () {
+            $('#confirmDelete').off('click');
             $('#denyDelete').off('click');
+        });
+
+        $(document).on('hidden.bs.modal', '#completeTaskModal', function () {
+            $('#confirmComplete').off('click');
+            $('#denyComplete').off('click');
+        });
+
+        $(document).on('click', '.complete-task-checkbox', function (e) {
+            var checkbox = $(this);
+            e.preventDefault();
+            var id = $(this).attr("id").split('-')[1];
+
+            $('#completeTaskModal').modal("show");
+
+            $('#confirmComplete').on('click', function () {
+
+                $.ajax({
+                    url: '@Url.Action("FinishTask", "Endpoints")',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    data: { taskId: id },
+                    success: function () {
+                        $('td.centered-cell').find(`a[href="#edit-${id}"], a[href="#delete-${id}"]`).remove();
+                    },
+                    error: function (error) {
+                        console.error(error.responseText);
+                    }
+                });
+
+                checkbox.prop("disabled", true).prop("checked", true);
+                $('#completeTaskModal').modal("hide");
+            });
+
+            $('#denyComplete').on('click', function () {
+
+                $('#completeTaskModal').modal("hide");
+            });
         });
 
         $(document).on('click', ".todays-details", function (e) {
@@ -652,7 +698,7 @@
                         $("#todays-reminder-date").prop('disabled', false);
 
                     }
-                    if(task.recurUntil != undefined){
+                    if(task.recurUnit != undefined){
                         $("#todays-recurrence-interval").prop('disabled', false);
                         $("#todays-reccur-start").prop('disabled', false);
                         $("#todays-reccur-until").prop('disabled', false);

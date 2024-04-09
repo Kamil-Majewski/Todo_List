@@ -111,6 +111,15 @@ namespace Todo_List.WebApp.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> FinishTask(int taskId)
+        {
+            var task = await _mediator.Send(new GetCommitmentByIdQuery(taskId));
+            task.IsCompleted = true;
+
+            return Json(await _mediator.Send(new UpdateCommitmentCommand(task)));
+        }
+
+        [HttpGet]
         public async Task<IActionResult> UpdateCommitment(int taskId, string taskName, string taskPriority, string? taskNotes, string? taskDueDate, string taskRecurrenceUnit, int taskRecurrenceInterval, string? taskRecurStart, string? taskRecurUntil, string? taskReminderDate)
         {
             var task = await _mediator.Send(new GetCommitmentByIdQuery(taskId));
@@ -285,7 +294,8 @@ namespace Todo_List.WebApp.Controllers
                                             DueDate = c.DueDate,
                                             IsCompleted = c.IsCompleted,
                                             Priority = c.Priority.HasValue ? c.Priority.ToString() : "Brak",
-                                            ReminderSet = c.ReminderSet
+                                            ReminderSet = c.ReminderSet,
+                                            ReminderTime = c.ReminderTime
                                         })
                                         .Concat(todaysRecurringCommitments.Select(c => new
                                         {
@@ -294,7 +304,8 @@ namespace Todo_List.WebApp.Controllers
                                             DueDate = c.DueDate,
                                             IsCompleted = c.IsCompleted,
                                             Priority = c.Priority.HasValue ? c.Priority.ToString() : "Brak",
-                                            ReminderSet = c.ReminderSet
+                                            ReminderSet = c.ReminderSet,
+                                            ReminderTime = c.ReminderTime
                                         }))
                                         .AsEnumerable()
                                         .ToList();
