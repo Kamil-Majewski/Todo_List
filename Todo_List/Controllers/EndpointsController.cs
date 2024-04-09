@@ -2,9 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Todo_List.BusinessLogic.Commands.AddEntityToDatabase;
 using Todo_List.BusinessLogic.Commands.DeleteCommitmentById;
-using Todo_List.BusinessLogic.Commands.DeleteEntity;
+using Todo_List.BusinessLogic.Queries.GetCommitmentById;
 using Todo_List.BusinessLogic.Queries.GetTodaysCommitments;
-using Todo_List.Infrastructure.Entities;
 using Todo_List.Infrastructure.Entities.Commitments;
 using Todo_List.Infrastructure.Entities.Commitments.Abstract;
 using Todo_List.Infrastructure.Enums;
@@ -23,21 +22,9 @@ namespace Todo_List.WebApp.Controllers
 
         private async Task<IActionResult> AddCommitmentAndReminder<T>(T commitment, string? taskReminderDate) where T : Commitment
         {
-            var task = await _mediator.Send(new AddEntityToDatabaseCommand<T>(commitment));
+            commitment.ReminderTime = DateTime.TryParse(taskReminderDate, out var reminderDateTime) ? reminderDateTime : null;
 
-            if (taskReminderDate != null)
-            {
-                var reminder = new Reminder
-                {
-                    CommitmentId = commitment.Id,
-                    ReminderTime = DateTime.TryParse(taskReminderDate, out var reminderDateTime) ? reminderDateTime : DateTime.MinValue,
-                    Status = "Oczekiwanie"
-                };
-
-                await _mediator.Send(new AddEntityToDatabaseCommand<Reminder>(reminder));
-            }
-
-            return Ok(task);
+            return Ok(await _mediator.Send(new AddEntityToDatabaseCommand<T>(commitment)));
         }
 
         private async Task AddRecurringCommitmentInstances(RecurringCommitment commitment, string? taskReminderDate)
@@ -48,8 +35,6 @@ namespace Todo_List.WebApp.Controllers
             DateTime recurEnd = commitment.RecurUntil;
             int interval = commitment.RecurInterval;
             string unit = commitment.RecurUnit.ToString();
-
-            int increment = unit == "Days" ? interval : interval * 7; // Adjust increment based on unit
 
             int numberOfIntervals;
             if (unit == "Days")
@@ -76,26 +61,26 @@ namespace Todo_List.WebApp.Controllers
             for (int i = 0; i < numberOfIntervals; i++)
             {
                 DateTime dueDate;
-                DateTime reminderDateTime = DateTime.TryParse(taskReminderDate, out var dt) ? dt : DateTime.MinValue;
+                DateTime? reminderDateTime = DateTime.TryParse(taskReminderDate, out var dt) ? dt : null;
                 if (unit == "Days")
                 {
                     dueDate = commitment.DueDate!.Value.AddDays(interval * (i + 1));
-                    reminderDateTime = reminderDateTime.AddDays(interval * (i + 1));
+                    reminderDateTime = reminderDateTime != null ? reminderDateTime.Value.AddDays(interval * (i + 1)) : null;
                 }
                 else if (unit == "Weeks")
                 {
                     dueDate = commitment.DueDate!.Value.AddDays(interval * (7 * (i + 1)));
-                    reminderDateTime = reminderDateTime.AddDays(interval * (7 * (i + 1)));
+                    reminderDateTime = reminderDateTime != null ? reminderDateTime.Value.AddDays(interval * (7 * (i + 1))) : null;
                 }
                 else if (unit == "Months")
                 {
                     dueDate = commitment.DueDate!.Value.AddMonths(interval * (i + 1));
-                    reminderDateTime = reminderDateTime.AddMonths(interval * (i + 1));
+                    reminderDateTime = reminderDateTime!= null ? reminderDateTime.Value.AddMonths(interval * (i + 1)) : null;
                 }
                 else
                 {
                     dueDate = commitment.DueDate!.Value.AddYears(interval * (i + 1));
-                    reminderDateTime = reminderDateTime.AddYears(interval * (i + 1));
+                    reminderDateTime = reminderDateTime != null ? reminderDateTime.Value.AddYears(interval * (i + 1)) : null;
                 }
 
                 var recurringInstance = new RecurringCommitment
@@ -107,27 +92,21 @@ namespace Todo_List.WebApp.Controllers
                     DueDate = dueDate,
                     SubtasksSerialized = null,
                     ReminderSet = commitment.ReminderSet,
+                    ReminderTime = reminderDateTime,
                     RecurUnit = commitment.RecurUnit,
                     RecurInterval = commitment.RecurInterval,
                     RecurrenceStart = commitment.RecurrenceStart,
                     RecurUntil = commitment.RecurUntil,
                 };
-
+                    
                 await _mediator.Send(new AddEntityToDatabaseCommand<RecurringCommitment>(recurringInstance));
-
-                if (taskReminderDate != null)
-                {
-                    var reminder = new Reminder
-                    {
-                        CommitmentId = recurringInstance.Id,
-                        ReminderTime = reminderDateTime,
-                        Status = "Oczekiwanie"
-                    };
-
-                    await _mediator.Send(new AddEntityToDatabaseCommand<Reminder>(reminder));
-                }
-
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetTaskById(int taskId)
+        {
+            return Json(await _mediator.Send(new GetCommitmentByIdQuery(taskId)));
         }
 
         [HttpGet]

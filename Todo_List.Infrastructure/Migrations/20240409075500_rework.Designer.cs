@@ -12,8 +12,8 @@ using Todo_List.Infrastructure;
 namespace Todo_List.Infrastructure.Migrations
 {
     [DbContext(typeof(TodoListDbContext))]
-    [Migration("20240408065418_added-reminderSet")]
-    partial class addedreminderSet
+    [Migration("20240409075500_rework")]
+    partial class rework
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,6 +53,9 @@ namespace Todo_List.Infrastructure.Migrations
                     b.Property<bool>("ReminderSet")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("ReminderTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("SubtasksSerialized")
                         .HasColumnType("nvarchar(max)");
 
@@ -63,56 +66,6 @@ namespace Todo_List.Infrastructure.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("Commitment");
 
                     b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("Todo_List.Infrastructure.Entities.Log", b =>
-                {
-                    b.Property<int>("LogId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogId"));
-
-                    b.Property<DateTime>("LogCreationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LogDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LogName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LogRelatedObjectsSerialized")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("LogId");
-
-                    b.ToTable("Logs");
-                });
-
-            modelBuilder.Entity("Todo_List.Infrastructure.Entities.Reminder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CommitmentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReminderTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Reminders");
                 });
 
             modelBuilder.Entity("Todo_List.Infrastructure.Entities.Commitments.OneTimeCommitment", b =>

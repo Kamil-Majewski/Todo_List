@@ -1,5 +1,5 @@
 ﻿<div class="modal fade" id="deleteEntityModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="deleteEntityModal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 550px; min-width: 307px; width:fit-content;">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 460px; min-width: 307px; width:fit-content;">
         <div class="modal-content">
             <div class="modal-body">
                 <span class="form-subtitle" id="modal-content-text"></span>
@@ -141,7 +141,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col">
-                                        <label for="todays-reminder-unit">Data przypomnienia</label>
+                                        <label for="todays-reminder-date">Data przypomnienia</label>
                                         <input type="datetime-local" class="datetime-input" id="todays-reminder-date" disabled />
                                     </div>
                                 </div>
@@ -153,6 +153,108 @@
                     </form>
                 </div>
             </div>
+            <div class="todays-task-details-container options-container" style="margin: 20px; display: none;">
+                <div class="option-content" style="max-width: 600px;">
+                    <div class="options-header">
+                        <div class="previous-page" style="flex:1;">
+                            <button class="violet-button" id="todays-task-details-previous-button" type="button" style="display: flex; align-items:center;" onclick="goBackToTodaysList()">
+                                <span class="arrow-back" style="max-width:24px;"><img src="/icons/previous.png"></span>
+                                <span>Powrót</span>
+                            </button>
+                        </div>
+                        <div class="option-name" style="flex:auto; text-align:center;">
+                            <span class="opion-name-placeholder" id="todays-details-window-title">Zadanie</span>
+                        </div>
+                        <div style="flex:1;"></div>
+                    </div>
+                    <hr />
+                    <div class="todays-details-content-container" style="padding: 10px 30px 30px 30px;">
+                        <div class="basic-data-details" style="margin-bottom: 20px">
+                            <span class="form-subtitle">Podstawowe dane</span>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Id:</label>
+                                        <span class="details-span" id="todays-id-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Nazwa zadania:</label>
+                                        <span class="details-span" id="todays-name-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Notatki:</label>
+                                        <span class="details-span" id="todays-notes-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Priorytet:</label>
+                                        <span class="details-span" id="todays-priority-detail"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="timeframes-details" style="margin-bottom: 20px">
+                            <span class="form-subtitle">Ramy czasowe</span>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Data zakończenia:</label>
+                                        <span class="details-span" id="todays-due-date-detail"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="recurrence-details" style="margin-bottom: 20px">
+                            <span class="form-subtitle">Powtarzalność zadania</span>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Jednostka czasu:</label>
+                                        <span class="details-span" id="todays-recurrence-unit-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Interwał:</label>
+                                        <span class="details-span" id="todays-recurrence-interval-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Początek powtarzania:</label>
+                                        <span class="details-span" id="todays-recur-start-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Koniec powtarzania:</label>
+                                        <span class="details-span" id="todays-recur-stop-detail"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                        </div>
+                        <div class="reminder-details" style="margin-bottom: 20px">
+                            <span class="form-subtitle">Przypomnienie</span>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="todays-detail-label">Data przypomnienia:</label>
+                                        <span class="details-span" id="todays-reminder-detail"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="tab-pane" id="calendar" aria-labelledby="calendar-tab">
         </div>
@@ -160,6 +262,20 @@
 </div>
 
 <script>
+    const priorityMappings = {
+        0: "Niski",
+        1: "Średni",
+        2: "Wysoki",
+        3: "Najwyższy"
+    };
+
+    const intervalUnitMappings = {
+        0: "Dni",
+        1: "Tygodnie",
+        2: "Miesiące",
+        3: "Lata"
+    };
+
     function openCreateTaskWindow(){
         $(".today-container").hide();
         $(".add-new-task").show();
@@ -169,6 +285,19 @@
     function addTaskToTable(task, tableId) {
         var dueTimeParsed = new Date(task.dueDate);
         var currentDate = new Date();
+
+        var priority = task.priority;
+
+        if (priority != null){
+            if (typeof priority == "number"){
+                priority = priorityMappings[priority];
+            }
+        }
+        else {
+            priority = "Brak";
+        }
+        
+        
 
         const isCompleted = (currentDate > dueTimeParsed)
             ? (task.isCompleted) ? `
@@ -229,7 +358,7 @@
                 </td>
                 <td class="task-name">${task.name}</td>
                 <td>${new Date(task.dueDate).toLocaleString('pl-PL').split(",")[1]}</td>
-                <td>${task.priority == null ? "Brak" : task.priority}</td>
+                <td>${priority}</td>
                 <td>${reminder}</td>
                 ${options}
             </tr>
@@ -269,6 +398,8 @@
         $("#createOrEditTodaysButton").html("");
 
         $(".add-new-task").hide();
+        $(".todays-task-details-container").hide();
+        $(".recurrence-details").show();
         $(".today-container").show();
     }
 
@@ -349,6 +480,51 @@
         $(document).on('hidden.bs.modal', '#viewReportModal', function () {
             $('#confirmDelete').off('click');s
             $('#denyDelete').off('click');
+        });
+
+        $(document).on('click', ".todays-details", function (e) {
+            e.preventDefault();
+            var id = $(this).attr('href').split('-')[1];
+
+
+            $.ajax({
+                url: '@Url.Action("GetTaskById", "Endpoints")',
+                type: 'GET',
+                contentType: 'application/json',
+                data: { taskId: id },
+                success: function (task) {
+                    var priority = task.priority;
+                    var intervalUnit = task.recurUnit
+
+                    if (priority != null && priority in priorityMappings) {
+                        priority = priorityMappings[priority];
+                    }
+                    if (intervalUnit != null || intervalUnit != undefined && intervalUnit in intervalUnitMappings){
+                        intervalUnit = intervalUnitMappings[intervalUnit];
+                    }
+                    if (intervalUnit == undefined || task.recurInterval == undefined || task.recurrenceStart == undefined) {
+                        $(".recurrence-details").hide();
+                    }
+
+                    $('#todays-id-detail').html(`${task.id}`);
+                    $('#todays-name-detail').html(`${task.name}`);
+                    $('#todays-notes-detail').html(`${task.notes || "Brak notatek"}`);
+                    $('#todays-priority-detail').html(`${priority || "Nie przypisano"}`);
+                    $('#todays-due-date-detail').html(`${(task.dueDate == null || task.dueDate == undefined) ? "Nie określono" : new Date(task.dueDate).toLocaleString('pl-PL')}`);
+                    $("#todays-recurrence-unit-detail").html(`${intervalUnit || "Nie wybrano"}`)
+                    $('#todays-recurrence-interval-detail').html(`${task.recurInterval || "Nie wybrano"}`);
+                    $('#todays-recur-start-detail').html(`${new Date(task.recurrenceStart).toLocaleString('pl-PL').split(',')[0] || "Nie wybrano"}`);
+                    $('#todays-recur-stop-detail').html(`${new Date(task.recurUntil).toLocaleString('pl-PL').split(',')[0] || "Nie wybrano"}`);
+                    $('#todays-reminder-detail').html(`${task.reminderTime == null ? "Nie ustawiono" : new Date(task.reminderTime).toLocaleString('pl-PL')}`);
+
+                    $(".todays-task-details-container").show();
+                    $(".today-container").hide();
+
+                },
+                error: function (error) {
+                    console.error(error.responseText);
+                }
+            });
         });
 
 
