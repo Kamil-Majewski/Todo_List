@@ -24,7 +24,7 @@
             </div>
         </div>
     </div>
-</div
+</div>
 
 <div class="content-container">
     <div class="tab-content" id="category-tab-content">
@@ -498,7 +498,9 @@
             contentType: 'application/json',
             data: {taskId, taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
             success: function (task) {
-                console.log(task);
+
+                $("#todays-tasks-table tbody").empty();
+                getTodaysTasks();
             },
             error: function (error) {
                 console.error(error.responseText);
@@ -520,6 +522,7 @@
             else {
                 addNewTask();
             }
+
             goBackToTodaysList();
         });
 
@@ -628,7 +631,7 @@
         });
         $("#todays-recurrence-unit").change(function () {
             if ($("#todays-recurrence-unit").val() == -1) {
-                $("#todays-recurrence-interval").prop('disabled', true);
+                $("#todays-recurrence-interval").val("").prop('disabled', true);
                 $("#todays-reccur-start").val("").prop('disabled', true);
                 $("#todays-reccur-until").val("").prop('disabled', true);
             }

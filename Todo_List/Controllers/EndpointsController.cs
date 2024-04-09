@@ -4,6 +4,7 @@ using Todo_List.BusinessLogic.Commands.AddEntityToDatabase;
 using Todo_List.BusinessLogic.Commands.DeleteCommitmentById;
 using Todo_List.BusinessLogic.Commands.UpdateCommitment;
 using Todo_List.BusinessLogic.Queries.GetCommitmentById;
+using Todo_List.BusinessLogic.Queries.GetRecurrentCommitmentsForDeletion;
 using Todo_List.BusinessLogic.Queries.GetTodaysCommitments;
 using Todo_List.Infrastructure.Entities.Commitments;
 using Todo_List.Infrastructure.Entities.Commitments.Abstract;
@@ -86,6 +87,7 @@ namespace Todo_List.WebApp.Controllers
 
                 var recurringInstance = new RecurringCommitment
                 {
+                    ParentId = commitment.Id,
                     Name = commitment.Name,
                     Notes = commitment.Notes,
                     IsCompleted = false,
@@ -171,7 +173,32 @@ namespace Todo_List.WebApp.Controllers
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    var recurringTask = (RecurringCommitment)task;
+
+                    var newUnscheduledTask = new UnscheduledCommitment
+                    {
+                        Name = taskName,
+                        Priority = parsedPriority == -1 ? null : (Priority)parsedPriority,
+                        Notes = taskNotes,
+                        ReminderSet = taskReminderDate != null,
+                        ReminderTime = DateTime.TryParse(taskReminderDate, out var reminderDateTime) ? reminderDateTime : null,
+                        IsCompleted = recurringTask.IsCompleted,
+                        SubtasksSerialized = null,
+                    };
+
+                    var parentId = recurringTask.ParentId == 0 ? recurringTask.Id : recurringTask.ParentId;
+                    var listOfRecurringTaskIds = await _mediator.Send(new GetRecurrentCommitmentIdsQuery(parentId));
+
+                    foreach (var id in listOfRecurringTaskIds)
+                    {
+                        await _mediator.Send(new DeleteCommitmentByIdCommand(id));
+                    }
+
+                    await _mediator.Send(new DeleteCommitmentByIdCommand(recurringTask.Id));
+
+                    await _mediator.Send(new AddEntityToDatabaseCommand<UnscheduledCommitment>(newUnscheduledTask));
+
+                    return Json(newUnscheduledTask);
                 }
             }
             else if (updatedType == "OneTime")
@@ -207,13 +234,98 @@ namespace Todo_List.WebApp.Controllers
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    var recurringTask = (RecurringCommitment)task;
+
+                    var newOneTimeTask = new OneTimeCommitment
+                    {
+                        Name = taskName,
+                        Priority = parsedPriority == -1 ? null : (Priority)parsedPriority,
+                        Notes = taskNotes,
+                        ReminderSet = taskReminderDate != null,
+                        ReminderTime = DateTime.TryParse(taskReminderDate, out var reminderDateTime) ? reminderDateTime : null,
+                        IsCompleted = recurringTask.IsCompleted,
+                        SubtasksSerialized = null,
+                        DueDate = recurringTask.DueDate,
+                    };
+
+                    var parentId = recurringTask.ParentId == 0 ? recurringTask.Id : recurringTask.ParentId;
+                    var listOfRecurringTaskIds = await _mediator.Send(new GetRecurrentCommitmentIdsQuery(parentId));
+
+                    foreach (var id in listOfRecurringTaskIds)
+                    {
+                        await _mediator.Send(new DeleteCommitmentByIdCommand(id));
+                    }
+
+                    await _mediator.Send(new DeleteCommitmentByIdCommand(recurringTask.Id));
+
+                    await _mediator.Send(new AddEntityToDatabaseCommand<OneTimeCommitment>(newOneTimeTask));
+
+                    return Json(newOneTimeTask);
+
                 }
 
             }
             else
             {
-                throw new NotImplementedException();
+                if (task is UnscheduledCommitment || task is OneTimeCommitment)
+                {
+                    var newRecurringTask = new RecurringCommitment
+                    {
+                        ParentId = 0,
+                        Name = taskName,
+                        Notes = taskNotes,
+                        IsCompleted = task.IsCompleted,
+                        Priority = parsedPriority == -1 ? null : (Priority)parsedPriority,
+                        SubtasksSerialized = null,
+                        DueDate = DateTime.Parse(taskDueDate!),
+                        ReminderSet = taskReminderDate != null,
+                        RecurUnit = (RecurrenceUnit)int.Parse(taskRecurrenceUnit),
+                        RecurInterval = taskRecurrenceInterval,
+                        RecurrenceStart = DateTime.Parse(taskRecurStart!),
+                        RecurUntil = taskRecurUntil == null ? DateTime.Parse(taskRecurStart!).AddMonths(1) : DateTime.Parse(taskRecurUntil)
+                    };
+
+                    await _mediator.Send(new DeleteCommitmentByIdCommand(task.Id));
+
+                    await AddRecurringCommitmentInstances(newRecurringTask, taskReminderDate);
+
+                    return Json(newRecurringTask);
+
+                }
+                else
+                {
+                    var recurringTask = (RecurringCommitment)task;
+
+                    var newRecurringTask = new RecurringCommitment
+                    {
+                        ParentId = 0,
+                        Name = taskName,
+                        Notes = taskNotes,
+                        IsCompleted = recurringTask.IsCompleted,
+                        Priority = parsedPriority == -1 ? null : (Priority)parsedPriority,
+                        SubtasksSerialized = null,
+                        DueDate = DateTime.Parse(taskDueDate!),
+                        ReminderSet = taskReminderDate != null,
+                        RecurUnit = (RecurrenceUnit)int.Parse(taskRecurrenceUnit),
+                        RecurInterval = taskRecurrenceInterval,
+                        RecurrenceStart = DateTime.Parse(taskRecurStart!),
+                        RecurUntil = taskRecurUntil == null ? DateTime.Parse(taskRecurStart!).AddMonths(1) : DateTime.Parse(taskRecurUntil)
+                    };
+
+                    var parentId = recurringTask.ParentId == 0 ? recurringTask.Id : recurringTask.ParentId;
+                    var listOfRecurringTaskIds = await _mediator.Send(new GetRecurrentCommitmentIdsQuery(parentId));
+
+                    foreach (var id in listOfRecurringTaskIds)
+                    {
+                        await _mediator.Send(new DeleteCommitmentByIdCommand(id));
+                    }
+
+                    await _mediator.Send(new DeleteCommitmentByIdCommand(recurringTask.Id));
+
+                    await AddRecurringCommitmentInstances(newRecurringTask, taskReminderDate);
+
+                    return Json(newRecurringTask);
+                }
             }       
         }
 
@@ -257,6 +369,7 @@ namespace Todo_List.WebApp.Controllers
             {
                 var recurringCommitment = new RecurringCommitment
                 {
+                    ParentId = 0,
                     Name = taskName,
                     Notes = taskNotes,
                     IsCompleted = false,

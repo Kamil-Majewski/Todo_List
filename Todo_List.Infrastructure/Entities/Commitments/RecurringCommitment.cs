@@ -5,6 +5,7 @@ namespace Todo_List.Infrastructure.Entities.Commitments
 {
     public class RecurringCommitment : Commitment
     {
+        public int ParentId { get; set; }
         public DateTime RecurrenceStart{ get; set; } = default!;
         public DateTime? DueDate { get; set; }
         public int RecurInterval { get; set; }
