@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Todo_List.BusinessLogic.Commands.AddEntityToDatabase;
 using Todo_List.BusinessLogic.Commands.DeleteCommitmentById;
 using Todo_List.BusinessLogic.Commands.UpdateCommitment;
+using Todo_List.BusinessLogic.Queries.GetAllCommitments;
+using Todo_List.BusinessLogic.Queries.GetAllEntries;
 using Todo_List.BusinessLogic.Queries.GetCommitmentById;
 using Todo_List.BusinessLogic.Queries.GetRecurrentCommitmentsForDeletion;
 using Todo_List.BusinessLogic.Queries.GetTodaysCommitments;
@@ -424,6 +426,24 @@ namespace Todo_List.WebApp.Controllers
                                         .ToList();
 
             return Ok(allTodaysCommitments.OrderBy(c => c.DueDate));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllTasks()
+        {
+            var commitments = await _mediator.Send(new GetAllCommitmentsQuery());
+
+            var newList = new List<object>();
+
+            foreach(var commitment in commitments)
+            {
+                if (commitment is OneTimeCommitment || commitment is RecurringCommitment)
+                {
+                    newList.Add(commitment);
+                }
+            }
+
+            return Json(newList);
         }
     }
 }

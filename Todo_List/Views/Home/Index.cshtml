@@ -270,7 +270,11 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane" id="calendar" aria-labelledby="calendar-tab">
+        <div class="tab-pane" id="calendar" aria-labelledby="calendar-tab" style="margin:40px;">
+            <div class="calendar-window">
+                <div id='calendar-render'></div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -293,8 +297,13 @@
     function openCreateTaskWindow(){
         $(".today-container").hide();
         $(".add-new-task").show();
-        $("#todays-input-window-title").html("Utwórz zadanie")
-        $("#createOrEditTodaysButton").html("Utwórz")
+        $("#todays-input-window-title").html("Utwórz zadanie");
+        $("#createOrEditTodaysButton").html("Utwórz");
+        var currentTime = new Date();
+        currentTime.setMinutes(currentTime.getMinutes() + 10);
+        var time = currentTime.toISOString().slice(11, 16);
+        var formattedDateTime = currentTime.toLocaleDateString('fr-ca') + "T" + time;
+        $("#todays-start-date").attr("min", `${formattedDateTime}`)
     }
 
     function addTaskToTable(task, tableId) {
@@ -384,7 +393,7 @@
             var filterText = $(this).val().toLowerCase();
 
             $(`${tableIdentification} tbody tr`).each(function () {
-                var rowHit = false;
+                var rowHit = false; 
                 $(this).find('td').each(function () {
                     if ($(this).text().toLowerCase().includes(filterText)) {
                         rowHit = true;
@@ -407,7 +416,7 @@
         $("#todays-recurrence-interval").prop('disabled', true);
         $("#todays-reminder-date").prop("disabled", true);
         $("#todays-reccur-start").prop("disabled", true);
-        $("#todays-reccur-until").prop("diabled", true);
+        $("#todays-reccur-until").prop("disabled", true);
         $("#createOrEditTodaysButton").html("");
         $("#createOrEditTodaysButton").removeAttr("entity-id")
 
@@ -470,7 +479,8 @@
             contentType: 'application/json',
             data: { taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
             success: function (task) {
-                if(task.dueDate != null){
+                var todaysDate = new Date().toLocaleDateString('fr-ca');
+                if (task.dueDate != null && new Date(task.dueDate).toLocaleDateString('fr-ca') == todaysDate){
                     addTaskToTable(task, "todays-tasks-table");
                 }
             },
@@ -510,6 +520,8 @@
     }
 
     $(document).ready(function () {
+
+        initializeCalendar();
 
         getTodaysTasks();
 

@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Todo_List.Infrastructure.Entities.Commitments;
 
 namespace Todo_List.BusinessLogic.Queries.GetRecurrentCommitmentsForDeletion
 {

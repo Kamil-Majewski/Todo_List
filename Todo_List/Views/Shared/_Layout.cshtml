@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@500;600;700&display=swap" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 
     <script defer>
         $(document).ready(function () {
@@ -16,6 +17,7 @@
                 $(".active-tab").removeClass("active-tab");
                 e.preventDefault();
                 $(this).tab('show');
+                calendar.render();
                 $(this).parent().toggleClass("active-tab");
             });
         });
@@ -43,15 +45,15 @@
                 <div class="toolbar-body">
                     <ul class="options-list-left nav" id="master-card-headers" role="list">
                         <li class="option-list-item active-tab">
-                            <a class="link show active" id="today" href="#today">
+                            <a class="link show active" id="today-tab" href="#today">
                                 <span class="icon" id="today-icon"><img src="" @*title="Dzisiaj"*@/></span>
                                 <span class="text-nav" id="today-text">Dzisiaj</span>
                             </a>
                         </li>
                         <li class="option-list-item">
-                            <a class="link" id="upcoming" href="#upcoming">
-                                <span class="icon" id="upcoming-icon"><img src="" @*title="Nadchodzące"*@/></span>
-                                <span class="text-nav" id="upcoming-text">Kalendarz</span>
+                            <a class="link" id="calendar-tab" href="#calendar">
+                                <span class="icon" id="calendar-icon"><img src="" @*title="Nadchodzące"*@/></span>
+                                <span class="text-nav" id="calendar-text">Kalendarz</span>
                             </a>
                         </li>
                     </ul>
