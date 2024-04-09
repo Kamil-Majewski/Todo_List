@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Todo_List.BusinessLogic.Commands.AddEntityToDatabase;
 using Todo_List.BusinessLogic.Commands.DeleteCommitmentById;
+using Todo_List.BusinessLogic.Commands.UpdateCommitment;
 using Todo_List.BusinessLogic.Queries.GetCommitmentById;
 using Todo_List.BusinessLogic.Queries.GetTodaysCommitments;
 using Todo_List.Infrastructure.Entities.Commitments;
@@ -110,6 +111,104 @@ namespace Todo_List.WebApp.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> UpdateCommitment(int taskId, string taskName, string taskPriority, string? taskNotes, string? taskDueDate, string taskRecurrenceUnit, int taskRecurrenceInterval, string? taskRecurStart, string? taskRecurUntil, string? taskReminderDate)
+        {
+            var task = await _mediator.Send(new GetCommitmentByIdQuery(taskId));
+            var parsedRecurrenceUnit = int.Parse(taskRecurrenceUnit);
+            var parsedPriority = int.Parse(taskPriority);
+            string updatedType;
+
+            if(taskDueDate == null)
+            {
+                updatedType = "Unscheduled";
+            }
+            else if(taskDueDate != null && (parsedRecurrenceUnit == -1 || taskRecurrenceInterval == 0 || taskRecurStart == null))
+            {
+                updatedType = "OneTime";
+            }
+            else
+            {
+                updatedType = "Recurring";
+            }
+
+            if (updatedType == "Unscheduled")
+            {
+                if (task is UnscheduledCommitment)
+                {
+                    task.Name = taskName;
+                    task.Priority = parsedPriority == -1 ? null : (Priority)parsedPriority;
+                    task.Notes = taskNotes;
+                    task.ReminderSet = taskReminderDate != null;
+                    task.ReminderTime = DateTime.TryParse(taskReminderDate, out var reminderDateTime) ? reminderDateTime : null;
+
+                    return Json(_mediator.Send(new UpdateCommitmentCommand(task)));
+                }
+                else if (task is OneTimeCommitment)
+                {
+                    var newTask = new UnscheduledCommitment
+                    {
+                        Name = taskName,
+                        Priority = parsedPriority == -1 ? null : (Priority)parsedPriority,
+                        Notes = taskNotes,
+                        ReminderSet = taskReminderDate != null,
+                        ReminderTime = DateTime.TryParse(taskReminderDate, out var reminderDateTime) ? reminderDateTime : null,
+                        IsCompleted = task.IsCompleted,
+                        SubtasksSerialized = null,
+                    };
+
+                    await _mediator.Send(new DeleteCommitmentByIdCommand(task.Id));
+
+                    return Json(await _mediator.Send(new AddEntityToDatabaseCommand<UnscheduledCommitment>(newTask)));
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            else if (updatedType == "OneTime")
+            {
+                if (task is UnscheduledCommitment)
+                {
+                    var newTask = new OneTimeCommitment
+                    {
+                        Name = taskName,
+                        Priority = parsedPriority == -1 ? null : (Priority)parsedPriority,
+                        Notes = taskNotes,
+                        ReminderSet = taskReminderDate != null,
+                        ReminderTime = DateTime.TryParse(taskReminderDate, out var reminderDateTime) ? reminderDateTime : null,
+                        IsCompleted = task.IsCompleted,
+                        SubtasksSerialized = null,
+                        DueDate = DateTime.Parse(taskDueDate!)
+                    };
+
+                    await _mediator.Send(new DeleteCommitmentByIdCommand(task.Id));
+
+                    return Json(await _mediator.Send(new AddEntityToDatabaseCommand<OneTimeCommitment>(newTask)));
+                }
+                else if (task is OneTimeCommitment otTask)
+                {
+                    otTask.Name = taskName;
+                    otTask.Priority = parsedPriority == -1 ? null : (Priority)parsedPriority;
+                    otTask.Notes = taskNotes;
+                    otTask.ReminderSet = taskReminderDate != null;
+                    otTask.ReminderTime = DateTime.TryParse(taskReminderDate, out var reminderDateTime) ? reminderDateTime : null;
+                    otTask.DueDate = DateTime.Parse(taskDueDate!);
+
+                    return Json(await _mediator.Send(new UpdateCommitmentCommand(otTask)));
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }       
+        }
+
+        [HttpGet]
         public async Task<IActionResult> CreateNewTask(string taskName, string taskPriority, string? taskNotes, string? taskDueDate, string taskRecurrenceUnit, int taskRecurrenceInterval, string? taskRecurStart, string? taskRecurUntil, string? taskReminderDate)
         {
             var parsedRecurrenceUnit = int.Parse(taskRecurrenceUnit);
@@ -200,7 +299,7 @@ namespace Todo_List.WebApp.Controllers
                                         .AsEnumerable()
                                         .ToList();
 
-            return Ok(allTodaysCommitments);
+            return Ok(allTodaysCommitments.OrderBy(c => c.DueDate));
         }
     }
 }

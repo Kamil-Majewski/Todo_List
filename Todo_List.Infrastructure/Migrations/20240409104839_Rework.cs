@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Todo_List.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class rework : Migration
+    public partial class Rework : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

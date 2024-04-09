@@ -279,7 +279,8 @@
     function openCreateTaskWindow(){
         $(".today-container").hide();
         $(".add-new-task").show();
-        $("#createOrEditTodaysButton").html("Utwórz zadanie")
+        $("#todays-input-window-title").html("Utwórz zadanie")
+        $("#createOrEditTodaysButton").html("Utwórz")
     }
 
     function addTaskToTable(task, tableId) {
@@ -393,8 +394,11 @@
         $(".todays-options-form :input[type='number']").val('');
         $(".todays-options-form textarea").val('');
         $(".todays-options-form select").prop('selectedIndex', 0);
+        $("#todays-recurrence-unit").prop('disabled', true);
         $("#todays-recurrence-interval").prop('disabled', true);
         $("#todays-reminder-date").prop("disabled", true);
+        $("#todays-reccur-start").prop("disabled", true);
+        $("#todays-reccur-until").prop("diabled", true);
         $("#createOrEditTodaysButton").html("");
 
         $(".add-new-task").hide();
@@ -467,18 +471,51 @@
         });
     }
 
+    function updateTask(taskId){
+
+        var name = $("#todays-task-name").val();
+        var priority = $("#todays-task-priority").val();
+        var notes = $("#todays-task-notes").val();
+        var dueDate = $("#todays-start-date").val();
+        var recurrenceUnit = $("#todays-recurrence-unit").val();
+        var recurrenceInterval = $("#todays-recurrence-interval").val();
+        var recurStart = $("#todays-reccur-start").val();
+        var recurUntil = $("#todays-reccur-until").val();
+        var reminderDate = $("#todays-reminder-date").val();
+
+        $.ajax({
+            url: '@Url.Action("UpdateCommitment", "Endpoints")',
+            type: 'GET',
+            contentType: 'application/json',
+            data: {taskId, taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
+            success: function (task) {
+                console.log(task);
+            },
+            error: function (error) {
+                console.error(error.responseText);
+            }
+        });
+
+    }
+
     $(document).ready(function () {
 
         getTodaysTasks();
 
         $(document).on('submit', '#add-edit-todays-task-form', function (e) {
             e.preventDefault();
-            addNewTask();
+            if ($("#createOrEditTodaysButton").attr("entity-id") != null) {
+                var id = $("#createOrEditTodaysButton").attr("entity-id");
+                updateTask(id)
+            }
+            else {
+                addNewTask();
+            }
             goBackToTodaysList();
         });
 
         $(document).on('hidden.bs.modal', '#viewReportModal', function () {
-            $('#confirmDelete').off('click');s
+            $('#confirmDelete').off('click'); s
             $('#denyDelete').off('click');
         });
 
@@ -499,7 +536,7 @@
                     if (priority != null && priority in priorityMappings) {
                         priority = priorityMappings[priority];
                     }
-                    if (intervalUnit != null || intervalUnit != undefined && intervalUnit in intervalUnitMappings){
+                    if (intervalUnit != null || intervalUnit != undefined && intervalUnit in intervalUnitMappings) {
                         intervalUnit = intervalUnitMappings[intervalUnit];
                     }
                     if (intervalUnit == undefined || task.recurInterval == undefined || task.recurrenceStart == undefined) {
@@ -528,8 +565,8 @@
         });
 
 
-        $("#todays-start-date").change(function() {
-            if ($("#todays-start-date").val() == ""){
+        $("#todays-start-date").change(function () {
+            if ($("#todays-start-date").val() == "") {
                 $("#todays-reminder-date").val("").prop("disabled", true);
                 $("#todays-recurrence-interval").val("").prop('disabled', true);
                 $("#todays-recurrence-unit").prop('selectedIndex', 0);
@@ -537,39 +574,39 @@
                 $("#todays-reccur-start").val("").prop('disabled', true);
                 $("#todays-reccur-until").val("").prop('disabled', true);
             }
-            else{
+            else {
                 $("#todays-reminder-date").prop("disabled", false).prop('max', `${$("#todays-start-date").val()}`);
                 $("#todays-recurrence-unit").prop("disabled", false);
                 $("#todays-reccur-start").prop('min', `${$("#todays-start-date").val().split('T')[0]}`);
             }
         });
-        $("#todays-recurrence-unit").change(function() {
-            if ($("#todays-recurrence-unit").val() == -1){
+        $("#todays-recurrence-unit").change(function () {
+            if ($("#todays-recurrence-unit").val() == -1) {
                 $("#todays-recurrence-interval").prop('disabled', true);
                 $("#todays-reccur-start").val("").prop('disabled', true);
                 $("#todays-reccur-until").val("").prop('disabled', true);
             }
-            else{
+            else {
                 $("#todays-recurrence-interval").prop('disabled', false);
             }
-            
+
         });
 
         $("#todays-recurrence-interval").change(function () {
-            if ($("#todays-recurrence-interval").val() == ""){
+            if ($("#todays-recurrence-interval").val() == "") {
                 $("#todays-reccur-start").val("").prop('disabled', true);
                 $("#todays-reccur-until").val("").prop('disabled', true);
             }
-            else{
+            else {
                 $("#todays-reccur-start").prop('disabled', false);
             }
-            
+
         })
         $("#todays-reccur-start").change(function () {
             if ($("#todays-reccur-start").val() == "") {
                 $("#todays-reccur-until").val("").prop('disabled', true);
             }
-            else{
+            else {
                 $("#todays-reccur-until").prop('disabled', false).prop('min', `${$("#todays-reccur-start").val().split('T')[0]}`);;
             }
         });
@@ -589,7 +626,7 @@
             $('#confirmDelete').on('click', function () {
                 deleteTask(id);
                 thisElement.closest('tr').remove();
-                
+
                 $('#deleteEntityModal').modal("hide");
             });
 
@@ -599,6 +636,52 @@
             });
         });
 
+        $(document).on('click', ".todays-edit", function (e) {
+            e.preventDefault();
+            var id = $(this).attr('href').split('-')[1];
+
+            $.ajax({
+                url: '@Url.Action("GetTaskById", "Endpoints")',
+                type: 'GET',
+                contentType: 'application/json',
+                data: { taskId: id },
+                success: function (task) {
+
+                    if(task.dueDate != null) {
+                        $("#todays-recurrence-unit").prop('disabled', false);
+                        $("#todays-reminder-date").prop('disabled', false);
+
+                    }
+                    if(task.recurUntil != undefined){
+                        $("#todays-recurrence-interval").prop('disabled', false);
+                        $("#todays-reccur-start").prop('disabled', false);
+                        $("#todays-reccur-until").prop('disabled', false);
+                    }
+
+                    $("#todays-task-name").val(task.name);
+                    $("#todays-task-priority").prop('selectedIndex', task.priority == null ? 0 : task.priority + 1);
+                    $("#todays-task-notes").val(task.notes);
+                    $("#todays-start-date").val(task.dueDate == null ? "" : task.dueDate);
+                    $("#todays-recurrence-unit").prop('selectedIndex', task.recurUnit == undefined ? 0 : task.recurUnit + 1);
+                    $("#todays-recurrence-interval").val(task.recurInterval == undefined ? "" : task.recurInterval);
+                    $("#todays-reccur-start").val(task.recurrenceStart == undefined ? "" : task.recurrenceStart.split("T")[0]);
+                    $("#todays-reccur-until").val(task.recurUntil == undefined ? "" : task.recurUntil.split("T")[0]);
+                    $("#todays-reminder-date").val(task.reminderTime == null ? "" : task.reminderTime);
+
+                    $("#todays-input-window-title").html("Edytuj zadanie");
+                    $("#createOrEditTodaysButton").html("Edytuj");
+                    
+                    $(".today-container").hide();
+                    $(".add-new-task").show();
+
+                    $("#createOrEditTodaysButton").attr("entity-id", task.id);
+                    
+                },
+                error: function (error) {
+                        console.error(error.responseText);
+                }
+            });
+        });
 
         OnInputFilterTable(".todays-task-search", "#todays-tasks-table");
 

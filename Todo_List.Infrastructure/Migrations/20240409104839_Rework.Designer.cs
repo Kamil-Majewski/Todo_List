@@ -12,8 +12,8 @@ using Todo_List.Infrastructure;
 namespace Todo_List.Infrastructure.Migrations
 {
     [DbContext(typeof(TodoListDbContext))]
-    [Migration("20240409075500_rework")]
-    partial class rework
+    [Migration("20240409104839_Rework")]
+    partial class Rework
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
