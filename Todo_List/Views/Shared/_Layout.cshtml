@@ -17,7 +17,7 @@
                 $(".active-tab").removeClass("active-tab");
                 e.preventDefault();
                 $(this).tab('show');
-                calendar.render();
+                initializeCalendar();
                 $(this).parent().toggleClass("active-tab");
             });
         });

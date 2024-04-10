@@ -118,7 +118,7 @@ function addNewTask(prefix, endpoint, isToday) {
             }
 
             checkReminders();
-        },
+         },
         error: function (error) {
             console.error(error.responseText);
         }
@@ -237,7 +237,7 @@ function addTaskToTable(task, tableId, prefix) {
             <div>
             `
 
-    const reminder = task.reminderSet ? `${new Date(task.reminderTime).toLocaleString('pl-PL').split(", ")[1]}` : "Nie ustawiono";
+    const reminder = task.reminderSet ? `${new Date(task.reminderTime).toLocaleString('pl-PL')}` : "Nie ustawiono";
 
     const options = (currentDate > dueTimeParsed)
         ? (task.isCompleted) ? `
@@ -269,7 +269,7 @@ function addTaskToTable(task, tableId, prefix) {
                     ${isCompleted}
                 </td>
                 <td class="task-name">${task.name}</td>
-                <td>${new Date(task.dueDate).toLocaleString('pl-PL').split(",")[1]}</td>
+                <td>${new Date(task.dueDate).toLocaleString('pl-PL')}</td>
                 <td>${reminder}</td>
                 <td>${priority}</td>
                 ${options}
@@ -367,6 +367,7 @@ function goBackToCalendar() {
     $("#certain-new-button").hide();
     $("#certain-days-tasks-table tbody").empty();
     $(".calendar-window").show();
+    initializeCalendar();
     calendar.render();
 }
 

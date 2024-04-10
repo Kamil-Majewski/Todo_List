@@ -38,7 +38,7 @@ body {
     width: var(--toolbar-width);
     background-color: #6f5cc4;
     overflow: hidden;
-    height: 660px;
+    height: 79vh;
     z-index: 1;
 }
 
@@ -578,6 +578,11 @@ img {
     word-wrap: break-word;
 }
 
+.logo-text{
+    font-family: var(--font-family);
+    font-size: 18px;
+    font-weight: 600;
+}
 
 
 
