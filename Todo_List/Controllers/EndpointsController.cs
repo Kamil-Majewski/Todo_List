@@ -5,6 +5,7 @@ using Todo_List.BusinessLogic.Commands.DeleteCommitmentById;
 using Todo_List.BusinessLogic.Commands.UpdateCommitment;
 using Todo_List.BusinessLogic.Queries.GetAllCommitments;
 using Todo_List.BusinessLogic.Queries.GetAllEntries;
+using Todo_List.BusinessLogic.Queries.GetAllValidReminders;
 using Todo_List.BusinessLogic.Queries.GetCommitmentById;
 using Todo_List.BusinessLogic.Queries.GetCommitmentsForByDate;
 using Todo_List.BusinessLogic.Queries.GetRecurrentCommitmentsForDeletion;
@@ -472,6 +473,19 @@ namespace Todo_List.WebApp.Controllers
                 {
                     newList.Add(commitment);
                 }
+            }
+
+            return Json(newList);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllValidCommitmentsWithReminders()
+        {
+            var commitments = await _mediator.Send(new GetAllValidRemindersQuery());
+            List<object> newList = new List<object>();
+            foreach (var commitment in commitments.OrderBy(c => c.ReminderTime))
+            {
+                newList.Add(commitment);
             }
 
             return Json(newList);

@@ -65,6 +65,30 @@ function getEvents() {
     });
 }
 
+function getTasksForCertainDay(date) {
+    $.ajax({
+        url: '/Endpoints/GetCommitmentsForCertainDay',
+        type: 'GET',
+        data: { date },
+        contentType: 'application/json',
+        success: function (listOfTasks) {
+            if (listOfTasks.length == 0 || listOfTasks.length == undefined) {
+                console.log("No tasks found")
+                openCertainDaysList(date);
+                return;
+            }
+            listOfTasks.forEach(task => {
+                addTaskToTable(task, "certain-days-tasks-table", "certain-days");
+
+            });
+            openCertainDaysList(date);
+        },
+        error: function (error) {
+            console.error(error.responseText);
+        }
+    });
+}
+
 function addNewTask(prefix, endpoint, isToday) {
     var name = $(`#${prefix}-task-name`).val();
     var priority = $(`#${prefix}-task-priority`).val();
@@ -92,6 +116,8 @@ function addNewTask(prefix, endpoint, isToday) {
             if (task.dueDate != null && new Date(task.dueDate).toLocaleDateString() == date) {
                 addTaskToTable(task, `${prefix}-tasks-table`, `${prefix}`);
             }
+
+            checkReminders();
         },
         error: function (error) {
             console.error(error.responseText);
@@ -99,119 +125,73 @@ function addNewTask(prefix, endpoint, isToday) {
     });
 }
 
-function addListenersForForm(prefix) {
-    $(`#${prefix}-start-date`).change(function () {
-        if ($(`#${prefix}-start-date`).val() == "") {
-            $(`#${prefix}-reminder-date`).val("").prop("disabled", true);
-            $(`#${prefix}-recurrence-interval`).val("").prop('disabled', true);
-            $(`#${prefix}-recurrence-unit`).prop('selectedIndex', 0);
-            $(`#${prefix}-recurrence-unit`).val("").prop("disabled", true);
-            $(`#${prefix}-reccur-start`).val("").prop('disabled', true);
-            $(`#${prefix}-reccur-until`).val("").prop('disabled', true);
-        }
-        else {
-            $(`#${prefix}-reminder-date`).prop("disabled", false).prop('max', `${$(`#${prefix}-start-date`).val()}`);
-            $(`#${prefix}-recurrence-unit`).prop("disabled", false);
-            $(`#${prefix}-reccur-start`).prop('min', `${$(`#${prefix}-start-date`).val().split('T')[0]}`);
-        }
-    });
-    $(`#${prefix}-recurrence-unit`).change(function () {
-        if ($(`#${prefix}-recurrence-unit`).val() == -1) {
-            $(`#${prefix}-recurrence-interval`).val("").prop('disabled', true);
-            $(`#${prefix}-reccur-start`).val("").prop('disabled', true);
-            $(`#${prefix}-reccur-until`).val("").prop('disabled', true);
-        }
-        else {
-            $(`#${prefix}-recurrence-interval`).prop('disabled', false);
-        }
-    });
+function updateTask(taskId, prefix) {
 
-    $(`#${prefix}-recurrence-interval`).change(function () {
-        if ($(`#${prefix}-recurrence-interval`).val() == "") {
-            $(`#${prefix}-reccur-start`).val("").prop('disabled', true);
-            $(`#${prefix}-reccur-until`).val("").prop('disabled', true);
-        }
-        else {
-            $(`#${prefix}-reccur-start`).prop('disabled', false);
-        }
+    var name = $(`#${prefix}-task-name`).val();
+    var priority = $(`#${prefix}-task-priority`).val();
+    var notes = $(`#${prefix}-task-notes`).val();
+    var dueDate = $(`#${prefix}-start-date`).val();
+    var recurrenceUnit = $(`#${prefix}-recurrence-unit`).val();
+    var recurrenceInterval = $(`#${prefix}-recurrence-interval`).val();
+    var recurStart = $(`#${prefix}-reccur-start`).val();
+    var recurUntil = $(`#${prefix}-reccur-until`).val();
+    var reminderDate = $(`#${prefix}-reminder-date`).val();
 
-    })
-    $(`#${prefix}-reccur-start`).change(function () {
-        if ($(`#${prefix}-reccur-start`).val() == "") {
-            $(`#${prefix}s-reccur-until`).val("").prop('disabled', true);
-        }
-        else {
-            $(`#${prefix}-reccur-until`).prop('disabled', false).prop('min', `${$(`#${prefix}-reccur-start`).val().split('T')[0]}`);;
-        }
-    });
-}
-
-function openCertainDaysList(date) {
-    $(".calendar-window").hide();
-    $("#certain-days-tasks-table").attr("date", date);
-    if (date >= new Date().toLocaleDateString('fr-ca')) {
-        $("#certain-new-button").show();
-    }
-    $(".certain-days-container").show();
-}
-
-function getTasksForCertainDay(date) {
     $.ajax({
-        url: '/Endpoints/GetCommitmentsForCertainDay',
+        url: '/Endpoints/UpdateCommitment',
         type: 'GET',
-        data: { date },
+        contentType: 'application/json',
+        data: { taskId, taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
+        success: function (task) {
+
+            $(`#${prefix}-tasks-table tbody`).empty();
+            var date = $("#certain-days-tasks-table").attr("date");
+            getTasksForCertainDay(date);
+
+            checkReminders();
+        },
+        error: function (error) {
+            console.error(error.responseText);
+        }
+    });
+
+}
+
+function deleteTask(taskId) {
+    $.ajax({
+        url: '/Endpoints/DeleteTask',
+        type: 'GET',
+        data: { taskId },
+        contentType: 'application/json',
+        success: function () {
+            checkReminders();
+
+        },
+        error: function (error) {
+            console.error(error.responseText);
+        }
+    })
+}
+
+function getTodaysTasks() {
+    $.ajax({
+        url: '/Endpoints/GetTodaysTasks',
+        type: 'GET',
         contentType: 'application/json',
         success: function (listOfTasks) {
             if (listOfTasks.length == 0 || listOfTasks.length == undefined) {
                 console.log("No tasks found")
-                openCertainDaysList(date);
                 return;
             }
             listOfTasks.forEach(task => {
-                addTaskToTable(task, "certain-days-tasks-table", "certain-days");
+                addTaskToTable(task, "todays-tasks-table", "todays");
 
             });
-            openCertainDaysList(date);
         },
         error: function (error) {
             console.error(error.responseText);
         }
     });
-}
-
-function openCreateTaskWindow() {
-    $(".today-container").hide();
-    $(".add-new-task").show();
-    $("#todays-input-window-title").html("Utwórz zadanie");
-    $("#createOrEditTodaysButton").html("Utwórz");
-    var currentTime = new Date();
-    currentTime.setMinutes(currentTime.getMinutes() - currentTime.getTimezoneOffset());
-    currentTime.setMinutes(currentTime.getMinutes() + 10);
-
-    var formattedDateTime = currentTime.toISOString().slice(0, 16);
-
-    $("#todays-start-date").attr("min", `${formattedDateTime}`)
-}
-
-function openCreateTaskWindowCertain() {
-    $(".add-new-task-certain-days").show();
-    $(".certain-days-container").hide();
-    $("#certain-days-input-window-title").html("Utwórz zadanie");
-    $("#createOrEditCertainDaysButton").html("Utwórz");
-
-    var currentTime = new Date();
-    currentTime.setMinutes(currentTime.getMinutes() - currentTime.getTimezoneOffset());
-
-    if (currentTime.toLocaleDateString() == $("#certain-days-tasks-table").attr('date')) {
-        currentTime.setMinutes(currentTime.getMinutes() + 10);
-        var time = currentTime.toISOString().slice(11, 16);
-        var formattedDateTime = $("#certain-days-tasks-table").attr('date') + "T" + time;
-    }
-    else {
-        var formattedDateTime = $("#certain-days-tasks-table").attr('date') + "T00:00"
-    }
-
-    $("#certain-days-start-date").attr("min", `${formattedDateTime}`)
 }
 
 function addTaskToTable(task, tableId, prefix) {
@@ -312,6 +292,50 @@ function OnInputFilterTable(searchBarIdentification, tableIdentification) {
         });
     });
 }
+function openCertainDaysList(date) {
+    $(".calendar-window").hide();
+    $("#certain-days-tasks-table").attr("date", date);
+    if (date >= new Date().toLocaleDateString('fr-ca')) {
+        $("#certain-new-button").show();
+    }
+    $(".certain-days-container").show();
+}
+
+function openCreateTaskWindow() {
+    $(".today-container").hide();
+    $(".add-new-task").show();
+    $("#todays-input-window-title").html("Utwórz zadanie");
+    $("#createOrEditTodaysButton").html("Utwórz");
+    var currentTime = new Date();
+    currentTime.setMinutes(currentTime.getMinutes() - currentTime.getTimezoneOffset());
+    currentTime.setMinutes(currentTime.getMinutes() + 10);
+
+    var formattedDateTime = currentTime.toISOString().slice(0, 16);
+
+    $("#todays-start-date").attr("min", `${formattedDateTime}`)
+}
+
+function openCreateTaskWindowCertain() {
+    $(".add-new-task-certain-days").show();
+    $(".certain-days-container").hide();
+    $("#certain-days-input-window-title").html("Utwórz zadanie");
+    $("#createOrEditCertainDaysButton").html("Utwórz");
+
+    var currentTime = new Date();
+    currentTime.setMinutes(currentTime.getMinutes() - currentTime.getTimezoneOffset());
+
+    if (currentTime.toLocaleDateString() == $("#certain-days-tasks-table").attr('date')) {
+        currentTime.setMinutes(currentTime.getMinutes() + 10);
+        var time = currentTime.toISOString().slice(11, 16);
+        var formattedDateTime = $("#certain-days-tasks-table").attr('date') + "T" + time;
+    }
+    else {
+        var formattedDateTime = $("#certain-days-tasks-table").attr('date') + "T00:00"
+    }
+
+    $("#certain-days-start-date").attr("min", `${formattedDateTime}`)
+}
+
 function goBackToTodaysList() {
     $(".todays-options-form :input[type='text']").val('');
     $(".todays-options-form :input[type='datetime-local']").val('');
@@ -362,68 +386,106 @@ function goBackToCertainDaysList() {
     $(".certain-days-container").show();
 }
 
-function deleteTask(taskId) {
-    $.ajax({
-        url: '/Endpoints/DeleteTask',
-        type: 'GET',
-        data: { taskId },
-        contentType: 'application/json',
-        success: function () {
-
-        },
-        error: function (error) {
-            console.error(error.responseText);
+function addListenersForForm(prefix) {
+    $(`#${prefix}-start-date`).change(function () {
+        if ($(`#${prefix}-start-date`).val() == "") {
+            $(`#${prefix}-reminder-date`).val("").prop("disabled", true);
+            $(`#${prefix}-recurrence-interval`).val("").prop('disabled', true);
+            $(`#${prefix}-recurrence-unit`).prop('selectedIndex', 0);
+            $(`#${prefix}-recurrence-unit`).val("").prop("disabled", true);
+            $(`#${prefix}-reccur-start`).val("").prop('disabled', true);
+            $(`#${prefix}-reccur-until`).val("").prop('disabled', true);
         }
+        else {
+            $(`#${prefix}-reminder-date`).prop("disabled", false).prop('max', `${$(`#${prefix}-start-date`).val()}`);
+            $(`#${prefix}-recurrence-unit`).prop("disabled", false);
+            $(`#${prefix}-reccur-start`).prop('min', `${$(`#${prefix}-start-date`).val().split('T')[0]}`);
+        }
+    });
+    $(`#${prefix}-recurrence-unit`).change(function () {
+        if ($(`#${prefix}-recurrence-unit`).val() == -1) {
+            $(`#${prefix}-recurrence-interval`).val("").prop('disabled', true);
+            $(`#${prefix}-reccur-start`).val("").prop('disabled', true);
+            $(`#${prefix}-reccur-until`).val("").prop('disabled', true);
+        }
+        else {
+            $(`#${prefix}-recurrence-interval`).prop('disabled', false);
+        }
+    });
+
+    $(`#${prefix}-recurrence-interval`).change(function () {
+        if ($(`#${prefix}-recurrence-interval`).val() == "") {
+            $(`#${prefix}-reccur-start`).val("").prop('disabled', true);
+            $(`#${prefix}-reccur-until`).val("").prop('disabled', true);
+        }
+        else {
+            $(`#${prefix}-reccur-start`).prop('disabled', false);
+        }
+
     })
+    $(`#${prefix}-reccur-start`).change(function () {
+        if ($(`#${prefix}-reccur-start`).val() == "") {
+            $(`#${prefix}s-reccur-until`).val("").prop('disabled', true);
+        }
+        else {
+            $(`#${prefix}-reccur-until`).prop('disabled', false).prop('min', `${$(`#${prefix}-reccur-start`).val().split('T')[0]}`);;
+        }
+    });
 }
 
-function getTodaysTasks() {
-    $.ajax({
-        url: '/Endpoints/GetTodaysTasks',
-        type: 'GET',
-        contentType: 'application/json',
-        success: function (listOfTasks) {
-            if (listOfTasks.length == 0 || listOfTasks.length == undefined) {
-                console.log("No tasks found")
-                return;
-            }
-            listOfTasks.forEach(task => {
-                addTaskToTable(task, "todays-tasks-table", "todays");
+function toggleExpand() {
+    var icon = document.getElementById('expandable-icon');
+    var reminderContainer = document.getElementById('reminder-container');
 
+    if (reminderContainer.style.display === 'none') {
+        reminderContainer.style.display = 'block';
+    } else {
+        reminderContainer.style.display = 'none';
+    }
+}
+
+function checkReminders() {
+    $.ajax({
+        url: '/Endpoints/GetAllValidCommitmentsWithReminders',
+        method: 'GET',
+        success: function (reminders) {
+            var currentTime = new Date();
+
+            reminders.forEach(function (reminder) {
+                console.log(reminder);
+
+                var reminderDateTime = new Date(reminder.reminderTime);
+
+                var timeDifference = reminderDateTime - currentTime;
+
+                if (timeDifference > 0 && timeDifference <= 30000) {
+
+                    $(".dropdown-menu").empty();
+
+                    var newNotification = `
+                        <div style="text-align: center; ">
+                            <div>Powiadomienie:<br />${reminder.name}<br />${new Date(reminder.dueDate).toLocaleString('pl-PL')}</div>
+                        </div>`;
+
+                    $(".dropdown-menu").append(newNotification);
+                    $(".bell").html(`<img src="/icons/bell-alert.png" alt="Dropdown Icon">`);
+
+                    var audio = new Audio(`/audio/notification.mp3`);
+                    audio.play();
+                }
+
+                if (timeDifference > 30000) {
+                    var checkTime = new Date(reminderDateTime.getTime() - 30000);
+                    var timeUntilCheck = checkTime - currentTime;
+                    setTimeout(checkReminders, timeUntilCheck);
+                }
             });
         },
-        error: function (error) {
-            console.error(error.responseText);
+        error: function (xhr, status, error) {
+            console.error('Error fetching reminders:', error.responseText);
         }
     });
 }
 
-function updateTask(taskId, prefix) {
 
-    var name = $(`#${prefix}-task-name`).val();
-    var priority = $(`#${prefix}-task-priority`).val();
-    var notes = $(`#${prefix}-task-notes`).val();
-    var dueDate = $(`#${prefix}-start-date`).val();
-    var recurrenceUnit = $(`#${prefix}-recurrence-unit`).val();
-    var recurrenceInterval = $(`#${prefix}-recurrence-interval`).val();
-    var recurStart = $(`#${prefix}-reccur-start`).val();
-    var recurUntil = $(`#${prefix}-reccur-until`).val();
-    var reminderDate = $(`#${prefix}-reminder-date`).val();
 
-    $.ajax({
-        url: '/Endpoints/UpdateCommitment',
-        type: 'GET',
-        contentType: 'application/json',
-        data: { taskId, taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
-        success: function (task) {
-
-            $(`#${prefix}-tasks-table tbody`).empty();
-            var date = $("#certain-days-tasks-table").attr("date");
-            getTasksForCertainDay(date);
-        },
-        error: function (error) {
-            console.error(error.responseText);
-        }
-    });
-
-}

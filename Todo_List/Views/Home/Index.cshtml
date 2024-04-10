@@ -541,6 +541,8 @@
 
         getTodaysTasks();
 
+        checkReminders();
+
         $(document).on('submit', '#add-edit-todays-task-form', function (e) {
             e.preventDefault();
             if ($("#createOrEditTodaysButton").attr("entity-id") != null) {
@@ -823,6 +825,25 @@
 
         OnInputFilterTable(".todays-task-search", "#todays-tasks-table");
         OnInputFilterTable(".certain-days-task-search", "#certain-days-tasks-table");
+
+        document.querySelector('.bell').addEventListener('click', function () {
+            // Toggle the 'show' class on the dropdown menu
+            var dropdownMenu = this.nextElementSibling;
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close the dropdown menu if the user clicks outside of it
+        window.addEventListener('click', function (event) {
+            var dropdownContainer = document.querySelector('.dropdown');
+            if (!dropdownContainer.contains(event.target)) {
+                var dropdownMenus = document.querySelectorAll('.dropdown-menu');
+                dropdownMenus.forEach(function (dropdownMenu) {
+                    if (dropdownMenu.classList.contains('show')) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                });
+            }
+        });
 
     });
 

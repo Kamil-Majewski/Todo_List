@@ -1,6 +1,6 @@
 :root {
     --layout-render-width: 69vw;
-    --toolbar-width: 15vw;
+    --toolbar-width: 12vw;
     --font-family: 'Open Sans', sans-serif;
 }
 
@@ -552,6 +552,29 @@ img {
     font-family: var(--font-family) !important;
     font-size: 14px !important;
     font-weight: 600;
+}
+
+.bell{
+    max-width: 28px;
+    margin-right: 80px;
+    cursor: pointer;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    transform: translateX(-41%);
+    z-index: 1000;
+    width: fit-content;
+    height: fit-content;
+    overflow: auto;
+    max-width: 250px;
+    max-height: 200px;
+    word-wrap: break-word;
 }
 
 
