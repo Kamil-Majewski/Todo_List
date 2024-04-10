@@ -6,6 +6,7 @@ using Todo_List.BusinessLogic.Commands.UpdateCommitment;
 using Todo_List.BusinessLogic.Queries.GetAllCommitments;
 using Todo_List.BusinessLogic.Queries.GetAllEntries;
 using Todo_List.BusinessLogic.Queries.GetCommitmentById;
+using Todo_List.BusinessLogic.Queries.GetCommitmentsForByDate;
 using Todo_List.BusinessLogic.Queries.GetRecurrentCommitmentsForDeletion;
 using Todo_List.BusinessLogic.Queries.GetTodaysCommitments;
 using Todo_List.Infrastructure.Entities.Commitments;
@@ -389,6 +390,36 @@ namespace Todo_List.WebApp.Controllers
 
                 return Ok(recurringCommitment);
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCommitmentsForCertainDay(DateTime date)
+        {
+            var (todayOneTimeCommitments, todaysRecurringCommitments) = await _mediator.Send(new GetCommitmentsByDateQuery(date));
+
+            var allCertainDaysCommitments = todayOneTimeCommitments.Select(c => new {
+                                            Id = c.Id,
+                                            Name = c.Name,
+                                            DueDate = c.DueDate,
+                                            IsCompleted = c.IsCompleted,
+                                            Priority = c.Priority.HasValue ? c.Priority.ToString() : "Brak",
+                                            ReminderSet = c.ReminderSet,
+                                            ReminderTime = c.ReminderTime
+                                        })
+                                        .Concat(todaysRecurringCommitments.Select(c => new
+                                        {
+                                            Id = c.Id,
+                                            Name = c.Name,
+                                            DueDate = c.DueDate,
+                                            IsCompleted = c.IsCompleted,
+                                            Priority = c.Priority.HasValue ? c.Priority.ToString() : "Brak",
+                                            ReminderSet = c.ReminderSet,
+                                            ReminderTime = c.ReminderTime
+                                        }))
+                                        .AsEnumerable()
+                                        .ToList();
+
+            return Ok(allCertainDaysCommitments.OrderBy(c => c.DueDate));
         }
 
         [HttpGet]

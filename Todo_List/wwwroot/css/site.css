@@ -35,7 +35,6 @@ body {
 }
 
 .toolbar-left {
-    transition: width 0.5s ease;
     width: var(--toolbar-width);
     background-color: #6f5cc4;
     overflow: hidden;
@@ -44,7 +43,6 @@ body {
 }
 
 .layout-render-body {
-    transition: width 0.5s ease;
     width: var(--layout-render-width);
     background-color: #f7f7f7;
     max-height: 79vh;
@@ -500,6 +498,11 @@ img {
 }
 
 .todays-detail-label{
+    min-width: 185px;
+    margin-bottom: 10px;
+}
+
+.certain-days-detail-label {
     min-width: 185px;
     margin-bottom: 10px;
 }

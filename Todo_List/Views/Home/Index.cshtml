@@ -270,9 +270,250 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane" id="calendar" aria-labelledby="calendar-tab" style="margin:40px;">
-            <div class="calendar-window">
+        <div class="tab-pane" id="calendar" aria-labelledby="calendar-tab">
+            <div class="calendar-window" style="margin:40px;">
                 <div id='calendar-render'></div>
+            </div>
+            <div class="certain-days-container list-container" style="display:none;">
+                <div class="options-header">
+                </div>
+                <div class="list-header">
+                    <div class="list-header-left" style="display: flex;">
+                        <button class="go-back-to-calendar-button violet-button" type="button" onclick="goBackToCalendar()" style="margin-right: 20px;">Wróć do kalendarza</button>
+                        <button class="add-new-button violet-button" type="button" id="certain-new-button" onclick="openCreateTaskWindowCertain()" style="display:none;">Dodaj nowe</button>
+                    </div>
+                    <div class="search-for-certain-days-task">
+                        <input class="search-for certain-days-task-search" placeholder="Wyszukaj zadanie" />
+                    </div>
+                </div>
+                <div class="list-content">
+                    <div class="table-responsive">
+                        <table class="table table-borderless" id="certain-days-tasks-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Nazwa</th>
+                                    <th scope="col">Czas do</th>
+                                    <th scope="col">Przypomnienie</th>
+                                    <th scope="col">Priorytet</th>
+                                    <th class="centered-cell" scope="col" style="min-width: 175px;">Opcje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="add-new-task-certain-days options-container" style="display:none;">
+                <div class="option-content">
+                    <div class="options-header">
+                        <div class="previous-page" style="flex:1;">
+                            <button class="violet-button" type="button" style="display: flex; align-items:center;" onclick="goBackToCertainDaysList()">
+                                <span class="arrow-back" style="max-width:24px;"><img src="~/icons/previous.png" /></span>
+                                <span>Powrót</span>
+                            </button>
+                        </div>
+                        <div class="option-name" style="flex:auto; text-align:center;">
+                            <span class="opion-name-placeholder" id="certain-days-input-window-title">Nowe zadanie</span>
+                        </div>
+                        <div style="flex:1;"></div>
+                    </div>
+                    <hr />
+                    <form class="options-form certain-days-options-form" id="add-edit-certain-days-task-form">
+                        <div class="basic-data">
+                            <span class="form-subtitle">Podstawowe dane</span>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="certain-days-task-name">Nazwa zadania *</label>
+                                        <input type="text" class="form-input" id="certain-days-task-name" required maxlength="30" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="certain-days-task-priority">Priorytet</label>
+                                        <select class="task-priority" id="certain-days-task-priority">
+                                            <option value="-1" selected>Brak priorytetu</option>
+                                            <option value="0" >Niski</option>
+                                            <option value="1" >Średni</option>
+                                            <option value="2" >Wysoki</option>
+                                            <option value="3" >Najwyższy</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="certain-days-task-notes">Notatki</label>
+                                        <textarea class="form-input" id="certain-days-task-notes" rows="3" maxlength="120" spellcheck="false"></textarea>
+                                        <div class="symbol-counter" style="margin-top: 0.25rem; text-align: right" id="symbolCounterAdd">&nbsp</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="timeframes">
+                            <span class="form-subtitle">Ramy czasowe</span>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="certain-days-start-date">Data zakończenia</label>
+                                        <input type="datetime-local" class="datetime-input" id="certain-days-start-date" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="recurrence">
+                            <span class="form-subtitle">Powtarzalność zadania</span>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="certain-days-recurrence-unit">Jednostka czasu</label>
+                                        <select class="recurrence-unit" id="certain-days-recurrence-unit" disabled>
+                                            <option value="-1" selected>Nie powtarzaj</option>
+                                            <option value="0">Dni</option>
+                                            <option value="1">Tygodnie</option>
+                                            <option value="2">Miesiące</option>
+                                            <option value="3">Lata</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <label for="certain-days-recurrence-interval">Interwał czasu</label>
+                                        <input type="text" class="form-input" id="certain-days-recurrence-interval" disabled/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="certain-days-reccur-start">Powtarzaj od</label>
+                                        <input type="date" class="datetime-input" id="certain-days-reccur-start" disabled />
+                                    </div>
+                                    <div class="col">
+                                        <label for="certain-days-reccur-until">Powtarzaj do</label>
+                                        <input type="date" class="datetime-input" id="certain-days-reccur-until" disabled/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="reminder" style="margin-bottom:20px">
+                            <span class="form-subtitle">Przypomnienie</span>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="certain-days-reminder-date">Data przypomnienia</label>
+                                        <input type="datetime-local" class="datetime-input" id="certain-days-reminder-date" disabled />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="justify-content-center d-flex">
+                            <button type="submit" class="violet-button" id="createOrEditCertainDaysButton"></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="certain-days-task-details-container options-container" style="margin: 20px; display: none;">
+                <div class="option-content" style="max-width: 600px;">
+                    <div class="options-header">
+                        <div class="previous-page" style="flex:1;">
+                            <button class="violet-button" id="certain-days-task-details-previous-button" type="button" style="display: flex; align-items:center;" onclick="goBackToCertainDaysList()">
+                                <span class="arrow-back" style="max-width:24px;"><img src="/icons/previous.png"></span>
+                                <span>Powrót</span>
+                            </button>
+                        </div>
+                        <div class="option-name" style="flex:auto; text-align:center;">
+                            <span class="opion-name-placeholder" id="certain-days-details-window-title">Zadanie</span>
+                        </div>
+                        <div style="flex:1;"></div>
+                    </div>
+                    <hr />
+                    <div class="certain-days-details-content-container" style="padding: 10px 30px 30px 30px;">
+                        <div class="basic-data-details" style="margin-bottom: 20px">
+                            <span class="form-subtitle">Podstawowe dane</span>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Id:</label>
+                                        <span class="details-span" id="certain-days-id-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Nazwa zadania:</label>
+                                        <span class="details-span" id="certain-days-name-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Notatki:</label>
+                                        <span class="details-span" id="certain-days-notes-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Priorytet:</label>
+                                        <span class="details-span" id="certain-days-priority-detail"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="timeframes-details" style="margin-bottom: 20px">
+                            <span class="form-subtitle">Ramy czasowe</span>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Data zakończenia:</label>
+                                        <span class="details-span" id="certain-days-due-date-detail"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="recurrence-details-certain" style="margin-bottom: 20px">
+                            <span class="form-subtitle">Powtarzalność zadania</span>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Jednostka czasu:</label>
+                                        <span class="details-span" id="certain-days-recurrence-unit-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Interwał:</label>
+                                        <span class="details-span" id="certain-days-recurrence-interval-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Początek powtarzania:</label>
+                                        <span class="details-span" id="certain-days-recur-start-detail"></span>
+                                    </div>
+                                </div>
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Koniec powtarzania:</label>
+                                        <span class="details-span" id="certain-days-recur-stop-detail"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                        </div>
+                        <div class="reminder-details" style="margin-bottom: 20px">
+                            <span class="form-subtitle">Przypomnienie</span>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="row mb-10">
+                                    <div class="col d-flex">
+                                        <label class="certain-days-detail-label">Data przypomnienia:</label>
+                                        <span class="details-span" id="certain-days-reminder-detail"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -294,231 +535,6 @@
         3: "Lata"
     };
 
-    function openCreateTaskWindow(){
-        $(".today-container").hide();
-        $(".add-new-task").show();
-        $("#todays-input-window-title").html("Utwórz zadanie");
-        $("#createOrEditTodaysButton").html("Utwórz");
-        var currentTime = new Date();
-        currentTime.setMinutes(currentTime.getMinutes() + 10);
-        var time = currentTime.toISOString().slice(11, 16);
-        var formattedDateTime = currentTime.toLocaleDateString('fr-ca') + "T" + time;
-        $("#todays-start-date").attr("min", `${formattedDateTime}`)
-    }
-
-    function addTaskToTable(task, tableId) {
-        var dueTimeParsed = new Date(task.dueDate);
-        var currentDate = new Date();
-
-        var priority = task.priority;
-
-        if (priority != null){
-            if (typeof priority == "number"){
-                priority = priorityMappings[priority];
-            }
-        }
-        else {
-            priority = "Brak";
-        }
-        
-        const isCompleted = (currentDate > dueTimeParsed)
-            ? (task.isCompleted) ? `
-            <div class="round">
-                <input class="completed-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
-                <label for="checkbox-${task.id}"></label>
-            <div>`
-            : `
-            <div class="round-red">
-                <input class="failed-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
-                <label for="checkbox-${task.id}"></label>
-            <div>`
-            : (task.isCompleted) ? `
-            <div class="round">
-                <input class="completed-task-checkbox" type="Checkbox" id="checkbox-${task.id}" checked disabled/>
-                <label for="checkbox-${task.id}"></label>
-            <div>`
-            : `
-            <div class="round">
-                <input class="complete-task-checkbox" type="Checkbox" id="checkbox-${task.id}"/>
-                <label for="checkbox-${task.id}"></label>
-            <div>
-            `
-
-        const reminder = task.reminderSet ? `${new Date(task.reminderTime).toLocaleString('pl-PL').split(", ")[1]}` : "Nie ustawiono";
-
-        const options = (currentDate > dueTimeParsed)
-            ? (task.isCompleted) ? `
-            <td class="centered-cell">
-                <a href="#details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
-            </td>
-            `
-            : `
-            <td class="centered-cell">
-                <a href="#details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
-                <a href="#postpone-${task.id}" class="icon-list todays-postpone"><img src="/icons/postpone.png" title="Przełóż na jutro"/></a>
-            </td>`
-            : (task.isCompleted) ? `
-            <td class="centered-cell">
-                <a href="#details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
-            </td>
-            `
-            : `
-            <td class="centered-cell">
-                <a href="#details-${task.id}" class="icon-list todays-details"><img src="/icons/view-doc.png" title="Szczegóły"/></a>
-                <a href="#edit-${task.id}" class="icon-list todays-edit"><img src="/icons/edit.png" title="Edytuj"/></a>
-                <a href="#delete-${task.id}" class="icon-list todays-delete"><img src="/icons/trash.png" title="Usuń"/></a>
-            </td>
-            `
-
-
-        var newRow = `
-            <tr>
-                <td>
-                    ${isCompleted}
-                </td>
-                <td class="task-name">${task.name}</td>
-                <td>${new Date(task.dueDate).toLocaleString('pl-PL').split(",")[1]}</td>
-                <td>${reminder}</td>
-                <td>${priority}</td>
-                ${options}
-            </tr>
-        `;
-
-        $(`#${tableId} tbody`).append(newRow);
-    }
-
-    function OnInputFilterTable(searchBarIdentification, tableIdentification) {
-        $(searchBarIdentification).on('input', function () {
-
-            var filterText = $(this).val().toLowerCase();
-
-            $(`${tableIdentification} tbody tr`).each(function () {
-                var rowHit = false; 
-                $(this).find('td').each(function () {
-                    if ($(this).text().toLowerCase().includes(filterText)) {
-                        rowHit = true;
-                        return false;
-                    }
-                });
-
-                $(this).toggle(rowHit);
-            });
-        });
-    }
-    function goBackToTodaysList(){
-        $(".todays-options-form :input[type='text']").val('');
-        $(".todays-options-form :input[type='datetime-local']").val('');
-        $(".todays-options-form :input[type='date']").val('');
-        $(".todays-options-form :input[type='number']").val('');
-        $(".todays-options-form textarea").val('');
-        $(".todays-options-form select").prop('selectedIndex', 0);
-        $("#todays-recurrence-unit").prop('disabled', true);
-        $("#todays-recurrence-interval").prop('disabled', true);
-        $("#todays-reminder-date").prop("disabled", true);
-        $("#todays-reccur-start").prop("disabled", true);
-        $("#todays-reccur-until").prop("disabled", true);
-        $("#createOrEditTodaysButton").html("");
-        $("#createOrEditTodaysButton").removeAttr("entity-id")
-
-        $(".add-new-task").hide();
-        $(".todays-task-details-container").hide();
-        $(".recurrence-details").show();
-        $(".today-container").show();
-    }
-
-    function deleteTask(taskId){
-        $.ajax({
-            url: '@Url.Action("DeleteTask", "Endpoints")',
-            type: 'GET',
-            data: {taskId},
-            contentType: 'application/json',
-            success: function () {
-
-            },
-            error: function (error) {
-                console.error(error.responseText);
-            }
-        })
-    }
-
-    function getTodaysTasks(){
-        $.ajax({
-            url: '@Url.Action("GetTodaysTasks", "Endpoints")',
-            type: 'GET',
-            contentType: 'application/json',
-            success: function (listOfTasks) {
-                if(listOfTasks.length == 0 || listOfTasks.length == undefined){
-                    console.log("No tasks found")
-                    return;
-                }
-                listOfTasks.forEach(task => {
-                    addTaskToTable(task, "todays-tasks-table");
-                    
-                });
-            },
-            error: function (error) {
-                console.error(error.responseText);
-            }
-        });
-    }
-
-    function addNewTask(){
-        var name = $("#todays-task-name").val();
-        var priority = $("#todays-task-priority").val();
-        var notes = $("#todays-task-notes").val();
-        var dueDate = $("#todays-start-date").val();
-        var recurrenceUnit = $("#todays-recurrence-unit").val();
-        var recurrenceInterval = $("#todays-recurrence-interval").val();
-        var recurStart = $("#todays-reccur-start").val();
-        var recurUntil = $("#todays-reccur-until").val();
-        var reminderDate = $("#todays-reminder-date").val();
-
-        $.ajax({
-            url: '@Url.Action("CreateNewTask", "Endpoints")',
-            type: 'GET',
-            contentType: 'application/json',
-            data: { taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
-            success: function (task) {
-                var todaysDate = new Date().toLocaleDateString('fr-ca');
-                if (task.dueDate != null && new Date(task.dueDate).toLocaleDateString('fr-ca') == todaysDate){
-                    addTaskToTable(task, "todays-tasks-table");
-                }
-            },
-            error: function (error){
-                console.error(error.responseText);
-            }
-        });
-    }
-
-    function updateTask(taskId){
-
-        var name = $("#todays-task-name").val();
-        var priority = $("#todays-task-priority").val();
-        var notes = $("#todays-task-notes").val();
-        var dueDate = $("#todays-start-date").val();
-        var recurrenceUnit = $("#todays-recurrence-unit").val();
-        var recurrenceInterval = $("#todays-recurrence-interval").val();
-        var recurStart = $("#todays-reccur-start").val();
-        var recurUntil = $("#todays-reccur-until").val();
-        var reminderDate = $("#todays-reminder-date").val();
-
-        $.ajax({
-            url: '@Url.Action("UpdateCommitment", "Endpoints")',
-            type: 'GET',
-            contentType: 'application/json',
-            data: {taskId, taskName: name, taskPriority: priority, taskNotes: notes, taskDueDate: dueDate, taskRecurrenceUnit: recurrenceUnit, taskRecurrenceInterval: recurrenceInterval, taskRecurStart: recurStart, taskRecurUntil: recurUntil, taskReminderDate: reminderDate },
-            success: function (task) {
-
-                $("#todays-tasks-table tbody").empty();
-                getTodaysTasks();
-            },
-            error: function (error) {
-                console.error(error.responseText);
-            }
-        });
-
-    }
-
     $(document).ready(function () {
 
         initializeCalendar();
@@ -529,13 +545,26 @@
             e.preventDefault();
             if ($("#createOrEditTodaysButton").attr("entity-id") != null) {
                 var id = $("#createOrEditTodaysButton").attr("entity-id");
-                updateTask(id)
+                updateTask(id, "todays");
             }
             else {
-                addNewTask();
+                addNewTask("todays", "CreateNewTask", true);
             }
 
             goBackToTodaysList();
+        });
+
+        $(document).on('submit', '#add-edit-certain-days-task-form', function(e) {
+            e.preventDefault();
+            if ($("#createOrEditCertainDaysButton").attr("entity-id") != null) {
+                var id = $("#createOrEditCertainDaysButton").attr("entity-id");
+                updateTask(id, "certain-days");
+            }
+            else {
+                addNewTask("certain-days", "CreateNewTask", false);
+            }
+
+            goBackToCertainDaysList();
         });
 
         $(document).on('hidden.bs.modal', '#deleteEntityModal', function () {
@@ -625,52 +654,53 @@
             });
         });
 
+        $(document).on('click', ".certain-days-details", function (e) {
+            e.preventDefault();
+            var id = $(this).attr('href').split('-')[1];
 
-        $("#todays-start-date").change(function () {
-            if ($("#todays-start-date").val() == "") {
-                $("#todays-reminder-date").val("").prop("disabled", true);
-                $("#todays-recurrence-interval").val("").prop('disabled', true);
-                $("#todays-recurrence-unit").prop('selectedIndex', 0);
-                $("#todays-recurrence-unit").val("").prop("disabled", true);
-                $("#todays-reccur-start").val("").prop('disabled', true);
-                $("#todays-reccur-until").val("").prop('disabled', true);
-            }
-            else {
-                $("#todays-reminder-date").prop("disabled", false).prop('max', `${$("#todays-start-date").val()}`);
-                $("#todays-recurrence-unit").prop("disabled", false);
-                $("#todays-reccur-start").prop('min', `${$("#todays-start-date").val().split('T')[0]}`);
-            }
+
+            $.ajax({
+                url: '@Url.Action("GetTaskById", "Endpoints")',
+                type: 'GET',
+                contentType: 'application/json',
+                data: { taskId: id },
+                success: function (task) {
+                    var priority = task.priority;
+                    var intervalUnit = task.recurUnit
+
+                    if (priority != null && priority in priorityMappings) {
+                        priority = priorityMappings[priority];
+                    }
+                    if (intervalUnit != null || intervalUnit != undefined && intervalUnit in intervalUnitMappings) {
+                        intervalUnit = intervalUnitMappings[intervalUnit];
+                    }
+                    if (intervalUnit == undefined || task.recurInterval == undefined || task.recurrenceStart == undefined) {
+                        $(".recurrence-details-certain").hide();
+                    }
+
+                    $('#certain-days-id-detail').html(`${task.id}`);
+                    $('#certain-days-name-detail').html(`${task.name}`);
+                    $('#certain-days-notes-detail').html(`${task.notes || "Brak notatek"}`);
+                    $('#certain-days-priority-detail').html(`${priority || "Nie przypisano"}`);
+                    $('#certain-days-due-date-detail').html(`${(task.dueDate == null || task.dueDate == undefined) ? "Nie określono" : new Date(task.dueDate).toLocaleString('pl-PL')}`);
+                    $("#certain-days-recurrence-unit-detail").html(`${intervalUnit || "Nie wybrano"}`)
+                    $('#certain-days-recurrence-interval-detail').html(`${task.recurInterval || "Nie wybrano"}`);
+                    $('#certain-days-recur-start-detail').html(`${new Date(task.recurrenceStart).toLocaleString('pl-PL').split(',')[0] || "Nie wybrano"}`);
+                    $('#certain-days-recur-stop-detail').html(`${new Date(task.recurUntil).toLocaleString('pl-PL').split(',')[0] || "Nie wybrano"}`);
+                    $('#certain-days-reminder-detail').html(`${task.reminderTime == null ? "Nie ustawiono" : new Date(task.reminderTime).toLocaleString('pl-PL')}`);
+
+                    $(".certain-days-task-details-container").show();
+                    $(".certain-days-container").hide();
+
+                },
+                error: function (error) {
+                    console.error(error.responseText);
+                }
+            });
         });
-        $("#todays-recurrence-unit").change(function () {
-            if ($("#todays-recurrence-unit").val() == -1) {
-                $("#todays-recurrence-interval").val("").prop('disabled', true);
-                $("#todays-reccur-start").val("").prop('disabled', true);
-                $("#todays-reccur-until").val("").prop('disabled', true);
-            }
-            else {
-                $("#todays-recurrence-interval").prop('disabled', false);
-            }
 
-        });
-
-        $("#todays-recurrence-interval").change(function () {
-            if ($("#todays-recurrence-interval").val() == "") {
-                $("#todays-reccur-start").val("").prop('disabled', true);
-                $("#todays-reccur-until").val("").prop('disabled', true);
-            }
-            else {
-                $("#todays-reccur-start").prop('disabled', false);
-            }
-
-        })
-        $("#todays-reccur-start").change(function () {
-            if ($("#todays-reccur-start").val() == "") {
-                $("#todays-reccur-until").val("").prop('disabled', true);
-            }
-            else {
-                $("#todays-reccur-until").prop('disabled', false).prop('min', `${$("#todays-reccur-start").val().split('T')[0]}`);;
-            }
-        });
+        addListenersForForm("todays");
+        addListenersForForm("certain-days");
 
         $(document).on('click', ".todays-delete", function (e) {
             e.preventDefault();
@@ -744,7 +774,55 @@
             });
         });
 
+        $(document).on('click', ".certain-days-edit", function (e) {
+            e.preventDefault();
+            var id = $(this).attr('href').split('-')[1];
+
+            $.ajax({
+                url: '@Url.Action("GetTaskById", "Endpoints")',
+                type: 'GET',
+                contentType: 'application/json',
+                data: { taskId: id },
+                success: function (task) {
+
+                    if(task.dueDate != null) {
+                        $("#certain-days-recurrence-unit").prop('disabled', false);
+                        $("#certain-days-reminder-date").prop('disabled', false);
+
+                    }
+                    if(task.recurUnit != undefined){
+                        $("#certain-days-recurrence-interval").prop('disabled', false);
+                        $("#certain-days-reccur-start").prop('disabled', false);
+                        $("#certain-days-reccur-until").prop('disabled', false);
+                    }
+
+                    $("#certain-days-task-name").val(task.name);
+                    $("#certain-days-task-priority").prop('selectedIndex', task.priority == null ? 0 : task.priority + 1);
+                    $("#certain-days-task-notes").val(task.notes);
+                    $("#certain-days-start-date").val(task.dueDate == null ? "" : task.dueDate);
+                    $("#certain-days-recurrence-unit").prop('selectedIndex', task.recurUnit == undefined ? 0 : task.recurUnit + 1);
+                    $("#certain-days-recurrence-interval").val(task.recurInterval == undefined ? "" : task.recurInterval);
+                    $("#certain-days-reccur-start").val(task.recurrenceStart == undefined ? "" : task.recurrenceStart.split("T")[0]);
+                    $("#certain-days-reccur-until").val(task.recurUntil == undefined ? "" : task.recurUntil.split("T")[0]);
+                    $("#certain-days-reminder-date").val(task.reminderTime == null ? "" : task.reminderTime);
+
+                    $("#certain-days-input-window-title").html("Edytuj zadanie");
+                    $("#createOrEditCertainDaysButton").html("Edytuj");
+                    
+                    $(".certain-days-container").hide();
+                    $(".add-new-task-certain-days").show();
+
+                    $("#createOrEditCertainDaysButton").attr("entity-id", task.id);
+                    
+                },
+                error: function (error) {
+                        console.error(error.responseText);
+                }
+            });
+        });
+
         OnInputFilterTable(".todays-task-search", "#todays-tasks-table");
+        OnInputFilterTable(".certain-days-task-search", "#certain-days-tasks-table");
 
     });
 
