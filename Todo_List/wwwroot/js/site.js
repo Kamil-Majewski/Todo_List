@@ -145,9 +145,14 @@ function updateTask(taskId, prefix) {
         success: function (task) {
 
             $(`#${prefix}-tasks-table tbody`).empty();
-            var date = $("#certain-days-tasks-table").attr("date");
-            getTasksForCertainDay(date);
-
+            var date = $(`#${prefix}-tasks-table`).attr("date");
+            if (prefix == "todays") {
+                getTodaysTasks();
+            }
+            else {
+                getTasksForCertainDay(date);
+            }
+            
             checkReminders();
         },
         error: function (error) {
@@ -452,7 +457,6 @@ function checkReminders() {
             var currentTime = new Date();
 
             reminders.forEach(function (reminder) {
-                console.log(reminder);
 
                 var reminderDateTime = new Date(reminder.reminderTime);
 
